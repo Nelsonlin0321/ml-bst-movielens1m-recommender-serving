@@ -1,0 +1,13 @@
+version: '3'
+services:
+  recommender-api:
+    image: bst-movielens1m-recommender-serving:latest
+    env_file: docker.env
+    environment:
+      - debug=True
+      - ARTIFACTS_URL=s3://s3-mlflow-artifacts-storage/mlflow/15/7008c7131367497a8dd99e2b2d506f96
+      - PORT=5050
+      - WORKERS=2
+      - THREADS=2
+    ports:
+      - ${PORT}:${PORT}

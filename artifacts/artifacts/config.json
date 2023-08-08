@@ -1,0 +1,28 @@
+{
+    "embed_configs": {
+        "movie": {
+            "embed_dim": 128,
+            "num_embed": 3884
+        },
+        "genre": {
+            "embed_dim": 128,
+            "num_embed": 19
+        },
+        "age_group": {
+            "embed_dim": 128,
+            "num_embed": 8
+        },
+        "position": {
+            "embed_dim": 128,
+            "num_embed": 9
+        }
+    },
+    "transformer_num_layer": 3,
+    "dropout": 0.3,
+    "epoches": 1,
+    "learning_rate": 0.001,
+    "batch_size": 256,
+    "sequence_length": 9,
+    "device": "cpu",
+    "env": "prod"
+}
