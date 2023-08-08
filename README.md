@@ -5,7 +5,6 @@
 .env file
 
 AWS Secrets are used to download s3 artifacts.
-You can use rename the example-artifacts to artifacts for an example.
 
 ```sh
 export AWS_DEFAULT_REGION=
