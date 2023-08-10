@@ -46,3 +46,26 @@ or
 ```sh
 docker compose up
 ```
+
+## Call The API
+
+fastapi docs swagger for information: the http://0.0.0.0:8000/docs
+
+```sh
+curl -X 'POST' \
+  'http://0.0.0.0:8000/recommend' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "movie_ids": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "user_age": 20,
+  "sex": "M",
+  "topk": 3
+}'
+```
