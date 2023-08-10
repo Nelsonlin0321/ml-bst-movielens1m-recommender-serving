@@ -39,4 +39,6 @@ def download_s3_directory(s3_dir_path):
 
     output = subprocess.run(["aws", "s3", "cp", s3_dir_path,
                              "./", '--recursive'], capture_output=True)
-    return output
+
+    if output.returncode==1:
+        raise Exception(output.stderr.decode("utf-8"))
