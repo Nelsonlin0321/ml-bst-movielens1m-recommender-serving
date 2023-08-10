@@ -8,3 +8,4 @@ scikit-learn==1.2.2
 tqdm==4.65.0
 awscli
 gunicorn
+pytest
