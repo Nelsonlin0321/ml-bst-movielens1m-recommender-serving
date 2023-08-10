@@ -5,6 +5,7 @@
 .env file
 
 AWS Secrets are used to download s3 artifacts.
+You can use the repository artifacts but you have to remove "artifacts" from .dockerignore 
 
 ```sh
 export AWS_DEFAULT_REGION=
