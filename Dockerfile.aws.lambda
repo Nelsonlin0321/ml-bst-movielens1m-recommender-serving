@@ -2,8 +2,6 @@ FROM public.ecr.aws/lambda/python:3.10
 # Copy function code
 COPY . .
 
-COPY requirements.txt .
-
 RUN pip3 install --no-cache-dir  -r requirements.txt
 
 RUN pip3 install --no-cache-dir --upgrade typing_extensions==4.7.1
