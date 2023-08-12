@@ -9,13 +9,17 @@ import numpy as np
 
 
 class RecommenderEngine():
-    def __init__(self, artifact_dir='./artifacts') -> None:
+    def __init__(self, artifact_dir='./artifacts', batch_size=None) -> None:
         self.artifact_dir = artifact_dir
 
         self.config_dict = utils.open_json(
             f"{artifact_dir}/artifacts/config.json")
 
         self.config = utils.Config(dict=self.config_dict)
+
+        if batch_size is not None:
+            self.config.batch_size = batch_size
+
         self.recommende_model = BSTRecommenderModel(config=self.config)
         self.sequence_length = self.config_dict['sequence_length']
 
@@ -46,7 +50,7 @@ class RecommenderEngine():
 
         self.movie_info['genres'] = self.movie_info['genres'].apply(
             lambda x: x.tolist())
-    
+
     @utils.timer
     def preprocess(self, movie_ids: List[int], user_age: int, sex: str) -> pd.DataFrame:
 

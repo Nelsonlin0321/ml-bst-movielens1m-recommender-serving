@@ -18,23 +18,20 @@ if not is_loaded:
     logger.info("The env file is not loaded!")
 
 artifact_url = os.getenv("ARTIFACTS_URL")
+BATCH_SIZE = os.getenv("BATCH_SIZE")
+
 if artifact_url is not None:
     logger.info(f"ARTIFACTS_URL Env is {artifact_url}!")
     artifact_root_dir = utils.download_s3_directory(artifact_url, "/tmp")
     logger.info(f"artifact_root_dir is {artifact_root_dir}!")
-    list_dir = os.listdir(artifact_root_dir)
     aritifact_dir = os.path.join(artifact_root_dir, 'artifacts')
-    logger.info(f"The downloaded aritifact dir is {aritifact_dir}")
-    list_files = utils.recursively_listdir(
-        dir_path=aritifact_dir, with_tqdm=False)
-    list_files = json.dumps(list_files, indent=4)
-    logger.info(f"Lists aritifacts downloaded: {list_files}")
 
 
 else:
     raise Exception("ARTIFACTS_URL Env is not set!")
 
-recommender_engine = RecommenderEngine(artifact_dir=aritifact_dir)
+recommender_engine = RecommenderEngine(
+    artifact_dir=aritifact_dir, batch_size=BATCH_SIZE)
 
 app = FastAPI()
 
