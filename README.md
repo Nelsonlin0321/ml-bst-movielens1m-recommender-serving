@@ -262,7 +262,7 @@ curl -X 'POST' \
   "topk": 3
 }'
 ```
-Recommend Results
+Recommendation Results
 ```json
 [
     {
