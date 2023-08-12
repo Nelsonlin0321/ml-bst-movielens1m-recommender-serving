@@ -15,6 +15,7 @@ export ARTIFACTS_URL=s3://s3-mlflow-artifacts-storage/mlflow/15/7008c7131367497a
 export PORT=5050
 export WORKERS=2
 export THREADS=2
+export BATCH_SIZE=1024
 ```
 
 
@@ -36,6 +37,18 @@ uvicorn server:app --reload-dir src --host 0.0.0.0 --port 8000
 ### Build the docker
 ```sh
 docker build -t bst-movielens1m-recommender-serving:latest . --platform linux/arm64/v8
+```
+
+docker.env
+```sh
+AWS_DEFAULT_REGION=ap-southeast-1
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+ARTIFACTS_URL=
+PORT=5050
+WORKERS=2
+THREADS=2
+BATCH_SIZE=1024
 ```
 
 ### Run Docker Container
@@ -69,3 +82,98 @@ curl -X 'POST' \
   "topk": 3
 }'
 ```
+
+## Build AWS Lambda FastAPI Container
+
+```sh
+image_name=movielens1m-recommender-lambda
+docker build -t ${image_name}:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
+```
+
+## Test the Lambda
+```sh
+image_name=movielens1m-recommender-lambda
+docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it --rm ${image_name}:latest
+```
+
+```sh
+# for debug
+docker exec -it lambda-recommender /bin/bash
+```
+
+
+```sh
+# TEST healthcheck
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{
+    "resource": "/healthcheck",
+    "path": "/healthcheck",
+    "httpMethod": "GET",
+    "requestContext": {
+    },
+    "isBase64Encoded": false
+}'
+
+# OUTPUT
+# {"statusCode": 200, "headers": {"content-length": "95", "content-type": "application/json"}, "multiValueHeaders": {}, "body": "{\"message\":\"The server is up since 2023-08-12 03:57:28\",\"start_uct_time\":\"2023-08-12 03:57:28\"}", "isBase64Encoded": false}% 
+
+# TEST Recommend Endpoint
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{
+    "resource": "/recommend",
+    "path": "/recommend",
+    "httpMethod": "POST",
+    "requestContext": {
+        "resourcePath": "/recommend",
+        "httpMethod": "POST"
+    },
+    "body": "{\"movie_ids\": [1, 2, 3, 4], \"user_age\": 23, \"sex\": \"M\", \"topk\": 1}",
+    "isBase64Encoded": false
+}'
+
+#OUTPUT
+# {"statusCode": 200, "headers": {"content-length": "154", "content-type": "application/json"}, "multiValueHeaders": {}, "body": "[{\"movie_id\":50,\"title\":\"Usual Suspects, The (1995)\",\"genres\":[\"Crime\",\"Thriller\"],\"release_year\":1995,\"origin_title\":\"Usual Suspects, The\",\"rating\":5.0}]", "isBase64Encoded": false}% 
+```
+
+
+## Push To ECR
+
+```sh
+source .env
+account_id=932682266260
+region=ap-southeast-1
+image_name=movielens1m-recommender-lambda
+repo_name=${image_name}
+aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${region}.amazonaws.com
+```
+
+```sh
+aws ecr create-repository \
+    --repository-name ${repo_name} \
+    --region ${region}
+```
+
+```sh
+docker tag ${image_name}:latest ${account_id}.dkr.ecr.${region}.amazonaws.com/${repo_name}:latest
+```
+
+```sh
+docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:latest
+```
+
+## Create a lambda function using ECR image:
+
+<img src="images/create-lambda.png"></img>
+
+## Config Env Varialble
+<img src="images/lambda-env-config.png"></img>
+
+## Congig Permission with AWS Role
+
+### Create Role with S3 MLflow artifacts read access
+<img src="images/s3-mlflow-s3-artifacst-policy.png"></img>
+
+### Attach policy to lambda role
+<img src="images/lambda-role-policy.png"></img>
+
+## Test Lambda
+
+<img src="images/test-lambda-console.png"></img>

@@ -9,3 +9,4 @@ tqdm==4.65.0
 awscli
 gunicorn
 pytest
+mangum
