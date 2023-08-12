@@ -12,7 +12,7 @@
 
 ## MLOps Features
 
-| Features | Description | Impletment |
+| Features | Description | Implemented |
 | --- | --- | --- | 
 | Experiment tracking and model registry  | We track the model training experiment and register models using [Mlflow](https://mlflow.org/)  | ✔️ |
 | Workflow Orchestration| We use [Prefect](https://www.prefect.io/) orchestract training data pipeline   | ✔️ |
@@ -258,4 +258,42 @@ curl -X 'POST' \
   "sex": "M",
   "topk": 3
 }'
+```
+Recommend Results
+```json
+[
+    {
+        "movie_id": 50,
+        "title": "Usual Suspects, The (1995)",
+        "genres": [
+            "Crime",
+            "Thriller"
+        ],
+        "release_year": 1995,
+        "origin_title": "Usual Suspects, The",
+        "rating": 5.0
+    },
+    {
+        "movie_id": 527,
+        "title": "Schindler's List (1993)",
+        "genres": [
+            "Drama",
+            "War"
+        ],
+        "release_year": 1993,
+        "origin_title": "Schindler's List",
+        "rating": 5.0
+    },
+    {
+        "movie_id": 750,
+        "title": "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1963)",
+        "genres": [
+            "Sci-Fi",
+            "War"
+        ],
+        "release_year": 1963,
+        "origin_title": "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
+        "rating": 5.0
+    }
+]
 ```
