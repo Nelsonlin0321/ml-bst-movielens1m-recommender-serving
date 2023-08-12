@@ -9,7 +9,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-REGION = os.getenv("AWS_DEFAULT_REGION","ap-southeast-1")
+REGION = os.getenv("AWS_DEFAULT_REGION", "ap-southeast-1")
+
 
 def save_json(json_object, file_path):
     with open(file_path, mode='w', encoding='utf-8') as f:
@@ -52,11 +53,12 @@ class Config:
 #     else:
 #         message = output.stdout.decode("utf-8")
 #         logger.info(f"S3 Download Log:{message}")
-    
+
 #     return os.path.abspath("./")
 
-def download_s3_directory(s3_directory,local_directory="./"):
+def download_s3_directory(s3_directory, local_directory="./"):
 
+    local_directory = os.path.abspath(local_directory)
     s3 = boto3.client('s3', region_name=REGION)
 
     pattern = r"s3://([^/]+)/.*"
@@ -67,11 +69,12 @@ def download_s3_directory(s3_directory,local_directory="./"):
 
     for obj in response.get('Contents', []):
         s3_object_key = obj['Key']
-        local_file_path = os.path.join(local_directory,s3_object_key[len(s3_prefix)+1:])
-        os.makedirs(os.path.dirname(local_file_path),exist_ok = True)
+        local_file_path = os.path.join(
+            local_directory, s3_object_key[len(s3_prefix)+1:])
+        os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
         logger.info(f"downloading {s3_object_key} to {local_file_path}")
         s3.download_file(s3_bucket, s3_object_key, local_file_path)
-    
+
     return os.path.abspath(local_directory)
 
 
@@ -81,10 +84,11 @@ def timer(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         runtime = end_time - start_time
-        runtime = round(runtime*1000,2)
+        runtime = round(runtime*1000, 2)
         print(f"Runtime of {func.__name__}: {runtime} ms")
         return result
     return wrapper
+
 
 def recursively_listdir(dir_path, extensions=[''], with_tqdm=False):
 
@@ -108,6 +112,7 @@ def recursively_listdir(dir_path, extensions=[''], with_tqdm=False):
                     file_list.append(file_path)
                     break
     return file_list
+
 
 def listdir_with_full_path(dir_path):
     return [os.path.join(dir_path, path) for path in os.listdir(dir_path)]
