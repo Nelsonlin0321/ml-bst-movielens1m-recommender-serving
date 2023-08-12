@@ -18,7 +18,7 @@ class RecommenderEngine():
         self.config = utils.Config(dict=self.config_dict)
 
         if batch_size is not None:
-            self.config.batch_size = batch_size
+            self.config.batch_size = int(batch_size)
 
         self.recommende_model = BSTRecommenderModel(config=self.config)
         self.sequence_length = self.config_dict['sequence_length']
