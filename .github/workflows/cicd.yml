@@ -33,17 +33,18 @@ jobs:
 
       run: pytest tests
     
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v2
-      with:
-          context: .
-          dockerfile: Dockerfile.aws.lambda
-          push: true
-          tags: 932682266260.dkr.ecr.ap-southeast-1.amazonaws.com/movielens1m-recommender-lambda:latest
-          platform: linux/arm64/v8
+    - name: Build Docker Image
+      run: |
+          docker build -t ${{ vars.IMAGE_NAME }}:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
+      env:
+        IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+    
+    - name: Push To ECR
+      run: |
+        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+        docker tag ${IMAGE_NAME}:latest ${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME}:latest
+        docker push ${ACCOUNT_ID}.dkr.ecr.ap-southeast-1.amazonaws.com/${IMAGE_NAME}:latest
       env:
         AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        ARTIFACTS_URL: ${{ vars.ARTIFACTS_URL }}
-    
+        ACCOUNT_ID: ${{ vars.ACCOUNT_ID }}
+        IMAGE_NAME: ${{ vars.IMAGE_NAME }}
