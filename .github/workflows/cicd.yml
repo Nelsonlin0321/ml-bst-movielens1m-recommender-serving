@@ -70,6 +70,8 @@ jobs:
     - name: Invoke Lambda
       run: |
         sleep 15
+        pip install python-dotenv
+        pip install boto3
         python integration_test/test_lambda.py
       env:
         AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
