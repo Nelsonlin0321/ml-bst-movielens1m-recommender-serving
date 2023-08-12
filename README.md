@@ -17,74 +17,45 @@ export WORKERS=2
 export THREADS=2
 ```
 
-
-## Run Recommender API Locally
-
-
-```sh
-python -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-pip3 install torch --index-url https://download.pytorch.org/whl/cpu
-
-source .env
-uvicorn server:app --reload-dir src --host 0.0.0.0 --port 8000
-```
-
-## Run Recommender API Using Docker
-
-### Build the docker
-```sh
-docker build -t bst-movielens1m-recommender-serving:latest . --platform linux/arm64/v8
-```
-
-### Run Docker Container
-```sh
-docker run --env-file docker.env -p 5050:5050 -it bst-movielens1m-recommender-serving:latest
-```
-or
-```sh
-docker compose up
-```
-
-## Call The API
-
-fastapi docs swagger for information: the http://0.0.0.0:8000/docs
-
-```sh
-curl -X 'POST' \
-  'http://0.0.0.0:8000/recommend' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "movie_ids": [
-    1,
-    2,
-    3,
-    4,
-    5
-  ],
-  "user_age": 20,
-  "sex": "M",
-  "topk": 3
-}'
-```
-
 ## Build AWS Lambda FastAPI Container
 
 ```sh
-docker build -t bst-movielens1m-recommender-lambda-serving:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
+docker build -t movielens1m-recommender-lambda:latest -f ./Dockerfile  . --platform linux/arm64/v8
 ```
 
 ## Test the Lambda
 ```sh
-docker run --env-file docker.env -p 8080:8080 --name lambda-recommender -it bst-movielens1m-recommender-lambda-serving:latest
+docker run --env-file docker.env -p 9000:8080 --name lambda-recommender --rm -it movielens1m-recommender-lambda:latest
 ```
+
+```sh
+curl "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"payload":"hello world!"}'
+```
+
+
+
 
 ## Debug Container
 
 ```sh
 docker exec -it lambda-recommender /bin/bash
+```
+
+## Push Image to ECR
+```
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 932682266260.dkr.ecr.ap-southeast-1.amazonaws.com
+
+docker tag bst-movielens1m-recommender-lambda-serving:latest 932682266260.dkr.ecr.ap-southeast-1.amazonaws.com/bst-movielens1m-recommender-lambda-serving:latest
+
+```
+
+```sh
+curl "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{
+  "resource": "/healthcheck",
+  "payload":"hello world!"
+  "httpMethod": "GET",
+  "path": "/healthcheck",
+  }'
 ```
 
 ```sh

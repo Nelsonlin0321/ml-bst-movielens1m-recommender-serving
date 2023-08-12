@@ -1,7 +1,7 @@
 import os
 import dotenv
 import sys
-dotenv.load_dotenv("./.env")
+dotenv.load_dotenv("./../.env")
 
 curr_dir = os.path.dirname(__file__)
 root_dir = os.path.dirname(curr_dir)
@@ -30,3 +30,16 @@ def test_model_serving():
         sex=sex, topk=topk)
     
     assert len(results)==topk
+
+def test_lambda_handler():
+    from app import lambda_handler
+    
+    event = {'movie_ids':[1,2,3,4],
+             'user_age':23,
+             "sex":"M",
+             "topk":20}
+
+    results =  lambda_handler(event=event,context=None)
+
+    assert results['status_code']==200
+
