@@ -10,7 +10,7 @@
 <img src="images/mlops-workflow.png"></img>
 
 
-## MLOps CheckBox
+## MLOps Features
 
 | Features | Description | Impletment |
 | --- | --- | --- | 
