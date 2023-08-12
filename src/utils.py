@@ -49,7 +49,8 @@ def download_s3_directory(s3_dir_path):
     if output.returncode==1:
         raise Exception(output.stderr.decode("utf-8"))
     else:
-        logger.info(output.stdout.decode("utf-8"))
+        message = output.stdout.decode("utf-8")
+        logger.info(f"S3 Download Log:{message}")
         
     
     return os.path.abspath("./")
