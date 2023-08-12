@@ -26,7 +26,7 @@ jobs:
     - name: Run Unit Tests
       
       env:
-        AWS_DEFAULT_REGION: ap-southeast-1
+        AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         ARTIFACTS_URL: ${{ vars.ARTIFACTS_URL }}
@@ -42,7 +42,7 @@ jobs:
           tags: 932682266260.dkr.ecr.ap-southeast-1.amazonaws.com/movielens1m-recommender-lambda:latest
           platform: linux/arm64/v8
       env:
-        AWS_DEFAULT_REGION: ap-southeast-1
+        AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         ARTIFACTS_URL: ${{ vars.ARTIFACTS_URL }}
