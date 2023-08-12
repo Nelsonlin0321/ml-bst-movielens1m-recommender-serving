@@ -8,6 +8,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+REGION = os.getenv("AWS_DEFAULT_REGION","ap-southeast-1")
+
 def save_json(json_object, file_path):
     with open(file_path, mode='w', encoding='utf-8') as f:
         json.dump(json_object, f, indent=4, ensure_ascii=False)
@@ -42,7 +44,7 @@ class Config:
 def download_s3_directory(s3_dir_path):
 
     output = subprocess.run(["aws", "s3", "cp", s3_dir_path,
-                             "./", '--recursive'], capture_output=True)
+                             "./", '--recursive',"--region",REGION], capture_output=True)
 
     if output.returncode==1:
         raise Exception(output.stderr.decode("utf-8"))
