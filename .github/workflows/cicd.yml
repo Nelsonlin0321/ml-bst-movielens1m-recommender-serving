@@ -70,14 +70,9 @@ jobs:
     - name: Invoke Lambda
       run: |
         sleep 15
-        payload=$(cat tests/payload.json)
-        aws lambda invoke \
-        --function-name ${IMAGE_NAME} \
-        --payload ${payload} \
-        response.json
+        python integration_test/test_lambda.py
       env:
         AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         IMAGE_NAME: ${{ vars.IMAGE_NAME }}
-        
