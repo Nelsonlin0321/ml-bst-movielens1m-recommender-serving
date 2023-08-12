@@ -78,8 +78,14 @@ docker build -t movielens1m-recommender-lambda:latest -f ./Dockerfile.aws.lambda
 
 ## Test the Lambda
 ```sh
-docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it movielens1m-recommender-lambda:latest
+docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it --rm movielens1m-recommender-lambda:latest
 ```
+
+```sh
+# for debug
+docker exec -it lambda-recommender /bin/bash
+```
+
 
 ```sh
 # TEST healthcheck
