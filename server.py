@@ -44,7 +44,7 @@ async def recommend(pay_load: payLoad):
             sex=pay_load.sex, topk=pay_load.topk)
     except Exception as e:
         logging.error(e)
-        return HTTPException(status_code=404, detail=str(e))
+        return HTTPException(status_code=500, detail=str(e))
     return results
 
 
