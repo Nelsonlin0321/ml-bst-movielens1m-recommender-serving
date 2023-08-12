@@ -1,6 +1,30 @@
 # Movielens 1m Movie Recommendation Serving Based on Behavior Sequence Transformer Model 
 
-## Environmenet Settings
+
+## Introduction
+### This repository is to deploy transfromered-based movie recommendation as a Serverless API trained by Movielens dataset to predict what movie users like most according to their basic demographic feauture and sequence of movie views history.
+
+### We trained the model at the different repository please: Please this github repo to know more about how we trained the model with MLflow and Prefect Orchestration://github.com/Nelsonlin0321/ml-bst-movielens1m-recommender-training
+
+
+
+## MLOps CheckBox
+
+| MLOps Item | Tech Stack | Impletment |
+| --- | --- | --- | 
+| Experiment tracking and model registry  | [Mlflow](https://mlflow.org/)  | ✔️ |
+| Cloud | AWS  | ✔️ |
+| Workflow orchestration| [Prefect](https://www.prefect.io/)   | ✔️ |
+| Model deployment| Model Deploy to Lambda With API Gateway   | ✔️ |
+| Reproducibility | Clear instructions to train and deploy model | ✔️ |
+| Best practices  | Unit tests | ✔️ |
+| Best practices  | Integration test | ✔️ |
+| Best practices  |  CI/CD | ✔️ |
+
+
+## Guildance to Deploy
+
+### Environmenet Settings
 
 .env file
 
@@ -19,7 +43,7 @@ export BATCH_SIZE=1024
 ```
 
 
-## Run Recommender API Locally
+### Run Recommender API Locally
 
 
 ```sh
@@ -32,9 +56,9 @@ source .env
 uvicorn server:app --reload-dir src --host 0.0.0.0 --port 8000
 ```
 
-## Run Recommender API Using Docker
+### Run Recommender API Using Docker
 
-### Build the docker
+#### Build the docker
 ```sh
 docker build -t bst-movielens1m-recommender-serving:latest . --platform linux/arm64/v8
 ```
@@ -51,7 +75,7 @@ THREADS=2
 BATCH_SIZE=256
 ```
 
-### Run Docker Container
+#### Run Docker Container
 ```sh
 docker run --env-file docker.env -p 5050:5050 -it bst-movielens1m-recommender-serving:latest
 ```
@@ -60,7 +84,7 @@ or
 docker compose up
 ```
 
-## Call The API
+### Call The API
 
 fastapi docs swagger for information: the http://0.0.0.0:8000/docs
 
@@ -83,7 +107,7 @@ curl -X 'POST' \
 }'
 ```
 
-## Build AWS Lambda FastAPI Container
+### Build AWS Lambda FastAPI Container
 
 ```sh
 image_name=movielens1m-recommender-lambda
@@ -134,7 +158,7 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d
 ```
 
 
-## Push To ECR
+### Push To ECR
 
 ```sh
 source .env
@@ -159,33 +183,33 @@ docker tag ${image_name}:latest ${account_id}.dkr.ecr.${region}.amazonaws.com/${
 docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:latest
 ```
 
-## Create a lambda function using ECR image:
+### Create a lambda function using ECR image:
 
 <img src="images/create-lambda.png"></img>
 
-## Config Env Varialble
+### Config Env Varialble
 <img src="images/lambda-env-config.png"></img>
 
-## Congig Permission with AWS Role
+### Congig Permission with AWS Role
 
-### Create Role with S3 MLflow artifacts read access
+#### Create Role with S3 MLflow artifacts read access
 <img src="images/s3-mlflow-s3-artifacst-policy.png"></img>
 
-### Attach policy to lambda role
+#### Attach policy to lambda role
 <img src="images/lambda-role-policy.png"></img>
 
-## Test Lambda
+### Test Lambda
 
 <img src="images/test-lambda-console.png"></img>
 
 
-## Deploy
+### Deploy
 ```sh
 image_name=movielens1m-recommender-lambda
 aws lambda update-function-code --function-name ${image_name} --image-uri $(aws lambda get-function --function-name ${image_name} | jq -r '.Code.ImageUri')
 ```
 
-## Invoke Lambda
+### Invoke Lambda
 ```sh
 image_name=movielens1m-recommender-lambda
 payload=$(cat integration_test/test_recommend_payload.json)
@@ -195,24 +219,24 @@ aws lambda invoke \
     response.json
 ```
 
-## Build a Serverless API With API Gateway
+### Build a Serverless API With API Gateway
 <img src="images/create-api-gateway.png"></img>
 
 
-### Create "recommend" endpoint
+#### Create "recommend" endpoint
 
 <img src="images/recommend-api-endpoint.png"></img>
 
-### Create POST Method Recommendation API
+#### Create POST Method Recommendation API
 
 
 <img src="images/recommend-api-setup.png"></img>
 
-### Test You API
+#### Test You API
 <img src="images/test-api-gateway.png"></img>
 
 
-### Deploy To API Gateway
+#### Deploy To API Gateway
 
 <img src="images/deploy-to-production.png"></img>
 
