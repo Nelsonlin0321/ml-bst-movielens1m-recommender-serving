@@ -1,4 +1,5 @@
 import os
+import json
 import dotenv
 import logging
 import uvicorn
@@ -19,11 +20,17 @@ if not is_loaded:
 artifact_url = os.getenv("ARTIFACTS_URL")
 if artifact_url is not None:
     logger.info(f"ARTIFACTS_URL Env is {artifact_url}!")
-    artitfact_root_dir = utils.download_s3_directory(artifact_url)
-    logger.info(f"artitfact_root_dir is {artitfact_root_dir}!")
-    list_dir = os.listdir(artitfact_root_dir)
-    aritifact_dir = os.path.join(artitfact_root_dir,'artifacts')
+    artifact_root_dir = utils.download_s3_directory(artifact_url)
+    logger.info(f"artifact_root_dir is {artifact_root_dir}!")
+    list_dir = os.listdir(artifact_root_dir)
+    aritifact_dir = os.path.join(artifact_root_dir,'artifacts')
     logger.info(f"The downloaded aritifact dir is {aritifact_dir}")
+    list_files = utils.recursively_listdir(dir_path=aritifact_dir,with_tqdm=False)
+    list_files = json.dumps(list_files,indent=4)
+    logger.info(f"Lists aritifacts downloaded: {list_files}")
+
+    
+
 else:
     raise Exception("ARTIFACTS_URL Env is not set!")
 
