@@ -26,19 +26,19 @@ jobs:
       with:
           python-version: '3.10'
       
-    # - name: Install dependencies
-    #   run: |
-    #       python -m pip install --upgrade pip
-    #       pip install -r requirements.txt
-    #       pip install torch --index-url https://download.pytorch.org/whl/cpu
+    - name: Install dependencies
+      run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-    # - name: Run Unit Tests
-    #   env:
-    #     AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     ARTIFACTS_URL: ${{ vars.ARTIFACTS_URL }}
-    #   run: pytest tests
+    - name: Run Unit Tests
+      env:
+        AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        ARTIFACTS_URL: ${{ vars.ARTIFACTS_URL }}
+      run: pytest tests
     
     - name: Build Docker Image
       run: |
@@ -67,7 +67,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         IMAGE_NAME: ${{ vars.IMAGE_NAME }}
 
-    - name: Invoke Lambda
+    - name: Lambda Integration  Test
       run: |
         sleep 15
         pip install python-dotenv
