@@ -127,7 +127,7 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d
 source .env
 account_id=932682266260
 region=ap-southeast-1
-image_name=movielens1m-recommender-lambda 
+image_name=movielens1m-recommender-lambda
 repo_name=${image_name}
 aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${region}.amazonaws.com
 ```
