@@ -10,23 +10,23 @@ from src.payload import payLoad
 from src.recommender import RecommenderEngine
 
 logger = logging.getLogger()
-
+logger.setLevel(logging.INFO)
 
 is_loaded = dotenv.load_dotenv(".env")
 if not is_loaded:
-    logging.warn("The env file is not loaded!")
-
+    logger.info("The env file is not loaded!")
 
 artifact_url = os.getenv("ARTIFACTS_URL")
 if artifact_url is not None:
-    logging.info(f"ARTIFACTS_URL Env is {artifact_url}!")
-    utils.download_s3_directory(artifact_url)
+    logger.info(f"ARTIFACTS_URL Env is {artifact_url}!")
+    artitfact_root_dir = utils.download_s3_directory(artifact_url)
+    logger.info(f"artitfact_root_dir is {artitfact_root_dir}!")
+    aritifact_dir = os.path.join(artitfact_root_dir,'artifacts')
+    logger.info(f"The downloaded aritifact dir is {aritifact_dir}")
 else:
-    logging.warn("ARTIFACTS_URL Env is not set!")
+    raise Exception("ARTIFACTS_URL Env is not set!")
 
-aritifact_abs_dir = os.path.abspath('./artifacts')
-logging.info(f"The downloaded aritifact dir is {aritifact_abs_dir}")
-recommender_engine = RecommenderEngine(aritifact_dir=aritifact_abs_dir)
+recommender_engine = RecommenderEngine(aritifact_dir=aritifact_dir)
 
 app = FastAPI()
 

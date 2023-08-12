@@ -43,6 +43,7 @@ def download_s3_directory(s3_dir_path):
     if output.returncode==1:
         raise Exception(output.stderr.decode("utf-8"))
     
+    return os.path.abspath("./")
 
 def timer(func):
     def wrapper(*args, **kwargs):
