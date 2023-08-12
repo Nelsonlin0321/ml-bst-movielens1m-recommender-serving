@@ -1,0 +1,8 @@
+{
+    "resource": "/healthcheck",
+    "path": "/healthcheck",
+    "httpMethod": "GET",
+    "requestContext": {
+    },
+    "isBase64Encoded": false
+}
