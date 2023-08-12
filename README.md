@@ -198,3 +198,39 @@ aws lambda invoke \
 ## Build a Serverless API With API Gateway
 <img src="images/create-api-gateway.png"></img>
 
+
+### Create "recommend" endpoint
+
+<img src="images/recommend-api-endpoint.png"></img>
+
+### Create POST Method Recommendation API
+
+
+<img src="images/recommend-api-setup.png"></img>
+
+### Test You API
+<img src="images/test-api-gateway.png"></img>
+
+
+### Deploy To API Gateway
+
+<img src="images/deploy-to-production.png"></img>
+
+```sh
+curl -X 'POST' \
+  'https://j87zs9ftf4.execute-api.ap-southeast-1.amazonaws.com/production/recommend' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "movie_ids": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "user_age": 20,
+  "sex": "M",
+  "topk": 3
+}'
+```

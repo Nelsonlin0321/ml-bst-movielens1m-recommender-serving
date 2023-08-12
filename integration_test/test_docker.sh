@@ -20,5 +20,3 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d
     "body": "{\"movie_ids\": [1, 2, 3, 4], \"user_age\": 23, \"sex\": \"M\", \"topk\": 1}",
     "isBase64Encoded": false
 }'
-
-
