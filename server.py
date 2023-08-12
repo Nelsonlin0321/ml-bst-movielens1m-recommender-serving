@@ -1,6 +1,7 @@
 import os
 import dotenv
 import logging
+import uvicorn
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
@@ -22,7 +23,7 @@ if artifact_url is not None:
 recommender_engine = RecommenderEngine(aritifact_dir='./artifacts')
 
 app = FastAPI()
-handler = Mangum(app)
+
 
 @app.post("/recommend")
 async def recommend(pay_load: payLoad):
@@ -45,3 +46,8 @@ start_time = start_time.strftime(DATE_FORMAT)
 async def healthcheck():
     response = f'The server is up since {start_time}'
     return {"message": response, 'start_uct_time': start_time}
+
+handler = Mangum(app)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=5000)
