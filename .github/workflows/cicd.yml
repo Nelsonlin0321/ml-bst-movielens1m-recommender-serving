@@ -71,7 +71,10 @@ jobs:
       run: |
         sleep 15
         payload=$(cat tests/payload.json)
-        aws lambda invoke --function-name ${IMAGE_NAME} --payload ${payload} response.json
+        aws lambda invoke \
+        --function-name ${IMAGE_NAME} \
+        --payload ${payload} \
+        response.json
       env:
         AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
