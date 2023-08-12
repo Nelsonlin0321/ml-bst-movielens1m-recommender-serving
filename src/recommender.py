@@ -9,31 +9,31 @@ import numpy as np
 
 
 class RecommenderEngine():
-    def __init__(self, aritifact_dir='./artifacts') -> None:
-        self.aritifact_dir = aritifact_dir
+    def __init__(self, artifact_dir='./artifacts') -> None:
+        self.artifact_dir = artifact_dir
 
         self.config_dict = utils.open_json(
-            f"{aritifact_dir}/artifacts/config.json")
+            f"{artifact_dir}/artifacts/config.json")
 
         self.config = utils.Config(dict=self.config_dict)
         self.recommende_model = BSTRecommenderModel(config=self.config)
         self.sequence_length = self.config_dict['sequence_length']
 
         self.recommende_model.load_state_dict(
-            torch.load(f"{aritifact_dir}/model/pytorch_model.pt"))
+            torch.load(f"{artifact_dir}/model/pytorch_model.pt"))
 
         self.movie_id_map_dict = utils.open_object(
-            f"{aritifact_dir}/artifacts/movie_id_map_dict.pkl")
+            f"{artifact_dir}/artifacts/movie_id_map_dict.pkl")
         self.movies_to_genres_dict = utils.open_object(
-            f"{aritifact_dir}/artifacts/movies_to_genres_dict.pkl")
+            f"{artifact_dir}/artifacts/movies_to_genres_dict.pkl")
         self.genres_map_dict = utils.open_object(
-            f"{aritifact_dir}/artifacts/genres_map_dict.pkl")
+            f"{artifact_dir}/artifacts/genres_map_dict.pkl")
         self.age_group_id_map_dict = utils.open_object(
-            f"{aritifact_dir}/artifacts/age_group_id_map_dict.pkl")
+            f"{artifact_dir}/artifacts/age_group_id_map_dict.pkl")
 
         self.sex_id_map_dict = {"Male": 0.0, "Female": 1.0, "UNK": 0.5}
         self.rating_min_max_scaler = utils.open_object(
-            f"{aritifact_dir}/artifacts/rating_min_max_scaler.pkl")
+            f"{artifact_dir}/artifacts/rating_min_max_scaler.pkl")
 
         self.sorted_age_group_id_tuple = [(id_, limit) for id_, limit in sorted(
             self.age_group_id_map_dict.items(), key=lambda x: x[1]) if id_ != 'UNK']
@@ -42,7 +42,7 @@ class RecommenderEngine():
                                           remap_id in self.movie_id_map_dict.items()}
 
         self.movie_info = pd.read_parquet(
-            f"{aritifact_dir}/artifacts/movie_info.parquet")
+            f"{artifact_dir}/artifacts/movie_info.parquet")
 
         self.movie_info['genres'] = self.movie_info['genres'].apply(
             lambda x: x.tolist())
