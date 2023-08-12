@@ -6,6 +6,9 @@
 
 #### Training pipeline is at the different repository: Please refere this github repo: https://github.com/Nelsonlin0321/ml-bst-movielens1m-recommender-training to know more about how we trained the model with MLflow and Prefect Orchestration
 
+
+#### How to deploy your own Mlflow on EC2: Please refer this instruction: https://github.com/Nelsonlin0321/mlops-zoomcamp/blob/main/02-experiment-tracking/mlflow_on_aws.md
+
 ## MLOps Workflow
 <img src="images/mlops-workflow.png"></img>
 
