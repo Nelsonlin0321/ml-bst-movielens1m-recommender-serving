@@ -15,6 +15,7 @@ export ARTIFACTS_URL=s3://s3-mlflow-artifacts-storage/mlflow/15/7008c7131367497a
 export PORT=5050
 export WORKERS=2
 export THREADS=2
+export BATCH_SIZE=1024
 ```
 
 
@@ -36,6 +37,18 @@ uvicorn server:app --reload-dir src --host 0.0.0.0 --port 8000
 ### Build the docker
 ```sh
 docker build -t bst-movielens1m-recommender-serving:latest . --platform linux/arm64/v8
+```
+
+docker.env
+```sh
+AWS_DEFAULT_REGION=ap-southeast-1
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+ARTIFACTS_URL=
+PORT=5050
+WORKERS=2
+THREADS=2
+BATCH_SIZE=1024
 ```
 
 ### Run Docker Container
@@ -160,3 +173,7 @@ docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:late
 
 ### Attach policy to lambda role
 <img src="images/lambda-role-policy.png"></img>
+
+## Test Lambda
+
+<img src="images/test-lambda-console.png"></img>
