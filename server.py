@@ -14,13 +14,19 @@ logger = logging.getLogger()
 
 is_loaded = dotenv.load_dotenv(".env")
 if not is_loaded:
-    logging.warn("token crendential is not loaded")
+    logging.warn("The env file is not loaded!")
 
 
 artifact_url = os.getenv("ARTIFACTS_URL")
 if artifact_url is not None:
+    logging.info(f"ARTIFACTS_URL Env is {artifact_url}!")
     utils.download_s3_directory(artifact_url)
-recommender_engine = RecommenderEngine(aritifact_dir='./artifacts')
+else:
+    logging.warn("ARTIFACTS_URL Env is not set!")
+
+aritifact_abs_dir = os.path.abspath('./artifacts')
+logging.info(f"The downloaded aritifact dir is {aritifact_abs_dir}")
+recommender_engine = RecommenderEngine(aritifact_dir=aritifact_abs_dir)
 
 app = FastAPI()
 

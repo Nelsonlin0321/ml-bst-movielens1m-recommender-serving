@@ -111,3 +111,45 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d
 #OUTPUT
 # {"statusCode": 200, "headers": {"content-length": "154", "content-type": "application/json"}, "multiValueHeaders": {}, "body": "[{\"movie_id\":50,\"title\":\"Usual Suspects, The (1995)\",\"genres\":[\"Crime\",\"Thriller\"],\"release_year\":1995,\"origin_title\":\"Usual Suspects, The\",\"rating\":5.0}]", "isBase64Encoded": false}% 
 ```
+
+
+## Push To ECR
+
+```sh
+source .env
+account_id=932682266260
+region=ap-southeast-1
+
+aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${region}.amazonaws.com
+```
+
+```sh
+image_name=movielens1m-recommender-lambda
+repo_name=${image_name}
+aws ecr create-repository \
+    --repository-name ${repo_name} \
+    --region ${region}
+```
+
+```sh
+docker tag ${image_name}:latest ${account_id}.dkr.ecr.${region}.amazonaws.com/${repo_name}:latest
+```
+
+```sh
+docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:latest
+```
+
+## Create a lambda function using ECR image:
+
+<img src="images/create-lambda.png"></img>
+
+## Config Env Varialble
+<img src="images/lambda-env-config.png"></img>
+
+## Congig Permission with AWS Role
+
+### Create Role with S3 MLflow artifacts read access
+<img src="images/s3-mlflow-s3-artifacst-policy.png"></img>
+
+### Attach policy to lambda role
+<img src="images/lambda-role-policy.png"></img>
