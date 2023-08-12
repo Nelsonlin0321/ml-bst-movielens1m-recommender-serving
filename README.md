@@ -10,7 +10,7 @@
 
 ## MLOps CheckBox
 
-| MLOps Item | Tech Stack | Impletment |
+| MLOps Item | Description | Impletment |
 | --- | --- | --- | 
 | Experiment tracking and model registry  | [Mlflow](https://mlflow.org/)  | ✔️ |
 | Cloud | AWS  | ✔️ |
