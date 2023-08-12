@@ -46,7 +46,8 @@ class RecommenderEngine():
 
         self.movie_info['genres'] = self.movie_info['genres'].apply(
             lambda x: x.tolist())
-
+    
+    @utils.timer
     def preprocess(self, movie_ids: List[int], user_age: int, sex: str) -> pd.DataFrame:
 
         df_input = pd.DataFrame()
@@ -116,6 +117,7 @@ class RecommenderEngine():
 
         return lower_limit
 
+    @utils.timer
     def inference(self, df_input) -> pd.DataFrame:
 
         inference_dataset = RatingDataset(data=df_input)
@@ -132,6 +134,7 @@ class RecommenderEngine():
 
         return df_input
 
+    @utils.timer
     def postprocess(self, df_input, topk=5):
 
         df_input["movie_id"] = df_input["target_movie"].map(

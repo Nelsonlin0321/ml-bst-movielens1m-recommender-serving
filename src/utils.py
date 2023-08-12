@@ -2,7 +2,7 @@ import pickle
 import os
 import json
 import subprocess
-
+import time
 
 def save_json(json_object, file_path):
     with open(file_path, mode='w', encoding='utf-8') as f:
@@ -42,3 +42,15 @@ def download_s3_directory(s3_dir_path):
 
     if output.returncode==1:
         raise Exception(output.stderr.decode("utf-8"))
+    
+
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = end_time - start_time
+        runtime = round(runtime*1000,2)
+        print(f"Runtime of {func.__name__}: {runtime} ms")
+        return result
+    return wrapper
