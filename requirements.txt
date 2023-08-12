@@ -10,3 +10,4 @@ awscli
 gunicorn
 pytest
 mangum
+torch==2.0.1
