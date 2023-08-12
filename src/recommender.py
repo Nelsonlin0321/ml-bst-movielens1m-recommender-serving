@@ -42,7 +42,7 @@ class RecommenderEngine():
                                           remap_id in self.movie_id_map_dict.items()}
 
         self.movie_info = pd.read_parquet(
-            f"./{aritifact_dir}/artifacts/movie_info.parquet")
+            f"{aritifact_dir}/artifacts/movie_info.parquet")
 
         self.movie_info['genres'] = self.movie_info['genres'].apply(
             lambda x: x.tolist())
