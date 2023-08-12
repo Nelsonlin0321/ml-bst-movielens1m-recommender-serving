@@ -44,7 +44,7 @@ jobs:
     
     - name: Build Docker Image
       run: |
-          docker build -t ${{ vars.IMAGE_NAME }}:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
+          docker build -t ${{ vars.IMAGE_NAME }}:latest -f ./Dockerfile.aws.lambda  .
       env:
         IMAGE_NAME: ${{ vars.IMAGE_NAME }}
     
