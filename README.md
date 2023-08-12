@@ -48,7 +48,7 @@ ARTIFACTS_URL=
 PORT=5050
 WORKERS=2
 THREADS=2
-BATCH_SIZE=1024
+BATCH_SIZE=256
 ```
 
 ### Run Docker Container
@@ -188,10 +188,13 @@ aws lambda update-function-code --function-name ${image_name} --image-uri $(aws 
 ## Invoke Lambda
 ```sh
 image_name=movielens1m-recommender-lambda
-payload=$(cat tests/payload.json)
+payload=$(cat integration_test/test_recommend_payload.json)
 aws lambda invoke \
   --function-name ${image_name} \
   --payload ${payload} \
     response.json
 ```
+
+## Build a Serverless API With API Gateway
+<img src="images/create-api-gateway.png"></img>
 
