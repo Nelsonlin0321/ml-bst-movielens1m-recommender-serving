@@ -1,7 +1,8 @@
 import pickle
 import os
 import json
-import subprocess
+import re
+import boto3
 import time
 from tqdm import tqdm
 import logging
@@ -41,19 +42,38 @@ class Config:
             setattr(self, key, value)
 
 
-def download_s3_directory(s3_dir_path):
+# def download_s3_directory(s3_dir_path):
+#     import subprocess
+#     output = subprocess.run(["aws", "s3", "cp", s3_dir_path,
+#                              "./", '--recursive',"--region",REGION], capture_output=True)
 
-    output = subprocess.run(["aws", "s3", "cp", s3_dir_path,
-                             "./", '--recursive',"--region",REGION], capture_output=True)
-
-    if output.returncode==1:
-        raise Exception(output.stderr.decode("utf-8"))
-    else:
-        message = output.stdout.decode("utf-8")
-        logger.info(f"S3 Download Log:{message}")
-        
+#     if output.returncode==1:
+#         raise Exception(output.stderr.decode("utf-8"))
+#     else:
+#         message = output.stdout.decode("utf-8")
+#         logger.info(f"S3 Download Log:{message}")
     
-    return os.path.abspath("./")
+#     return os.path.abspath("./")
+
+def download_s3_directory(s3_directory,local_directory="./"):
+
+    s3 = boto3.client('s3', region_name=REGION)
+
+    pattern = r"s3://([^/]+)/.*"
+    s3_bucket = re.match(pattern, s3_directory).group(1)
+    s3_prefix = s3_directory.split(s3_bucket+"/")[1]
+
+    response = s3.list_objects_v2(Bucket=s3_bucket, Prefix=s3_prefix)
+
+    for obj in response.get('Contents', []):
+        s3_object_key = obj['Key']
+        local_file_path = os.path.join(local_directory,s3_object_key[len(s3_prefix)+1:])
+        os.makedirs(os.path.dirname(local_file_path),exist_ok = True)
+        logger.info(f"downloading {s3_object_key} to {local_file_path}")
+        s3.download_file(s3_bucket, s3_object_key, local_file_path)
+    
+    return os.path.abspath(local_directory)
+
 
 def timer(func):
     def wrapper(*args, **kwargs):
