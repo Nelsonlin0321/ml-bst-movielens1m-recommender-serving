@@ -34,6 +34,16 @@ jobs:
       run: pytest tests
     
     - name: Build and Push Docker Image
-      run: docker build . --file Dockerfile --tag bst-movielens1m-recommender-serving:$(date +%s)
-
+      uses: docker/build-push-action@v2
+      with:
+          context: .
+          dockerfile: Dockerfile.aws.lambda
+          push: true
+          tags: 932682266260.dkr.ecr.ap-southeast-1.amazonaws.com/movielens1m-recommender-lambda:latest
+          platform: linux/arm64/v8
+      env:
+        AWS_DEFAULT_REGION: ap-southeast-1
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        ARTIFACTS_URL: ${{ vars.ARTIFACTS_URL }}
     
