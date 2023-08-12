@@ -73,12 +73,14 @@ curl -X 'POST' \
 ## Build AWS Lambda FastAPI Container
 
 ```sh
-docker build -t movielens1m-recommender-lambda:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
+image_name=movielens1m-recommender-lambda
+docker build -t ${image_name}:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
 ```
 
 ## Test the Lambda
 ```sh
-docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it --rm movielens1m-recommender-lambda:latest
+image_name=movielens1m-recommender-lambda
+docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it --rm ${image_name}:latest
 ```
 
 ```sh
