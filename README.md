@@ -2,24 +2,25 @@
 
 
 ## Introduction
-### This repository is to deploy transfromered-based movie recommendation as a Serverless API trained by Movielens dataset to predict what movie users like most according to their basic demographic feauture and sequence of movie views history.
+#### This repository is to deploy transfromered-based movie recommendation as a Serverless API trained by Movielens dataset to predict what movie users like most according to their basic demographic feauture and sequence of movie views.
 
-### We trained the model at the different repository please: Please this github repo to know more about how we trained the model with MLflow and Prefect Orchestration://github.com/Nelsonlin0321/ml-bst-movielens1m-recommender-training
+#### Training pipeline is at the different repository: Please refere this github repo: https://github.com/Nelsonlin0321/ml-bst-movielens1m-recommender-training to know more about how we trained the model with MLflow and Prefect Orchestration
 
+## MLOps Workflow
+<img src="images/mlops-workflow.png"></img>
 
 
 ## MLOps CheckBox
 
-| MLOps Item | Description | Impletment |
+| Features | Description | Impletment |
 | --- | --- | --- | 
-| Experiment tracking and model registry  | [Mlflow](https://mlflow.org/)  | ✔️ |
-| Cloud | AWS  | ✔️ |
-| Workflow orchestration| [Prefect](https://www.prefect.io/)   | ✔️ |
-| Model deployment| Model Deploy to Lambda With API Gateway   | ✔️ |
-| Reproducibility | Clear instructions to train and deploy model | ✔️ |
-| Best practices  | Unit tests | ✔️ |
-| Best practices  | Integration test | ✔️ |
-| Best practices  |  CI/CD | ✔️ |
+| Experiment tracking and model registry  | We track the model training experiment and register models using [Mlflow](https://mlflow.org/)  | ✔️ |
+| Workflow Orchestration| We use [Prefect](https://www.prefect.io/) orchestract training data pipeline   | ✔️ |
+| Model deployment| Model with FastAPI Deployed to AWS Lambda With API Gateway   | ✔️ |
+| Reproducibility | We log all training artifatct to make sure reproducibility| ✔️ |
+| Best practices (DevOps)  | Unit tests in CICD to make sure continue integration | ✔️ |
+| Best practices (DevOps) | Integration test in CICD to make sure continue delivery | ✔️ |
+| Best practices (DevOps) | We impletment CI/CD using Github action workflow | ✔️ |
 
 
 ## Guildance to Deploy
