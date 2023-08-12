@@ -1,0 +1,11 @@
+{
+    "resource": "/recommend",
+    "path": "/recommend",
+    "httpMethod": "POST",
+    "requestContext": {
+        "resourcePath": "/recommend",
+        "httpMethod": "POST"
+    },
+    "body": "{\"movie_ids\": [1, 2, 3, 4], \"user_age\": 23, \"sex\": \"M\", \"topk\": 1}",
+    "isBase64Encoded": false
+}

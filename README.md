@@ -181,7 +181,17 @@ docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:late
 
 ## Deploy
 ```sh
-aws lambda update-function-code \
-  --function-name your-lambda-function-name \
-  --image-uri your-ecr-repository:latest
-``` 
+image_name=movielens1m-recommender-lambda
+aws lambda update-function-code --function-name ${image_name} --image-uri $(aws lambda get-function --function-name ${image_name} | jq -r '.Code.ImageUri')
+```
+
+## Invoke Lambda
+```sh
+image_name=movielens1m-recommender-lambda
+payload=$(cat tests/payload.json)
+aws lambda invoke \
+  --function-name ${image_name} \
+  --payload ${payload} \
+    response.json
+```
+
