@@ -73,139 +73,41 @@ curl -X 'POST' \
 ## Build AWS Lambda FastAPI Container
 
 ```sh
-docker build -t bst-movielens1m-recommender-lambda-serving:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
+docker build -t movielens1m-recommender-lambda:latest -f ./Dockerfile.aws.lambda  . --platform linux/arm64/v8
 ```
 
 ## Test the Lambda
 ```sh
-docker run --env-file docker.env -p 8080:8080 --name lambda-recommender -it bst-movielens1m-recommender-lambda-serving:latest
-```
-
-## Debug Container
-
-```sh
-docker exec -it lambda-recommender /bin/bash
+docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it movielens1m-recommender-lambda:latest
 ```
 
 ```sh
-curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{
-    "resource": "/hello",
-    "path": "/hello",
+# TEST healthcheck
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{
+    "resource": "/healthcheck",
+    "path": "/healthcheck",
     "httpMethod": "GET",
-    "headers": {
-      "Accept": "*/*",
-      "Accept-Encoding": "gzip, deflate",
-      "cache-control": "no-cache",
-      "CloudFront-Forwarded-Proto": "https",
-      "CloudFront-Is-Desktop-Viewer": "true",
-      "CloudFront-Is-Mobile-Viewer": "false",
-      "CloudFront-Is-SmartTV-Viewer": "false",
-      "CloudFront-Is-Tablet-Viewer": "false",
-      "CloudFront-Viewer-Country": "US",
-      "Content-Type": "application/json",
-      "headerName": "headerValue",
-      "Host": "gy415nuibc.execute-api.us-east-1.amazonaws.com",
-      "Postman-Token": "9f583ef0-ed83-4a38-aef3-eb9ce3f7a57f",
-      "User-Agent": "PostmanRuntime/2.4.5",
-      "Via": "1.1 d98420743a69852491bbdea73f7680bd.cloudfront.net (CloudFront)",
-      "X-Amz-Cf-Id": "pn-PWIJc6thYnZm5P0NMgOUglL1DYtl0gdeJky8tqsg8iS_sgsKD1A==",
-      "X-Forwarded-For": "54.240.196.186, 54.182.214.83",
-      "X-Forwarded-Port": "443",
-      "X-Forwarded-Proto": "https"
-    },
-    "multiValueHeaders":{
-      "Accept":[
-        "*/*"
-      ],
-      "Accept-Encoding":[
-        "gzip, deflate"
-      ],
-      "cache-control":[
-        "no-cache"
-      ],
-      "CloudFront-Forwarded-Proto":[
-        "https"
-      ],
-      "CloudFront-Is-Desktop-Viewer":[
-        "true"
-      ],
-      "CloudFront-Is-Mobile-Viewer":[
-        "false"
-      ],
-      "CloudFront-Is-SmartTV-Viewer":[
-        "false"
-      ],
-      "CloudFront-Is-Tablet-Viewer":[
-        "false"
-      ],
-      "CloudFront-Viewer-Country":[
-        "US"
-      ],
-      "":[
-        ""
-      ],
-      "Content-Type":[
-        "application/json"
-      ],
-      "headerName":[
-        "headerValue"
-      ],
-      "Host":[
-        "gy415nuibc.execute-api.us-east-1.amazonaws.com"
-      ],
-      "Postman-Token":[
-        "9f583ef0-ed83-4a38-aef3-eb9ce3f7a57f"
-      ],
-      "User-Agent":[
-        "PostmanRuntime/2.4.5"
-      ],
-      "Via":[
-        "1.1 d98420743a69852491bbdea73f7680bd.cloudfront.net (CloudFront)"
-      ],
-      "X-Amz-Cf-Id":[
-        "pn-PWIJc6thYnZm5P0NMgOUglL1DYtl0gdeJky8tqsg8iS_sgsKD1A=="
-      ],
-      "X-Forwarded-For":[
-        "54.240.196.186, 54.182.214.83"
-      ],
-      "X-Forwarded-Port":[
-        "443"
-      ],
-      "X-Forwarded-Proto":[
-        "https"
-      ]
-    },
-    "queryStringParameters": {
-    },
-    "multiValueQueryStringParameters":{
-    },
-    "pathParameters": {
-    },
-    "stageVariables": {
-      "stageVariableName": "stageVariableValue"
-    },
     "requestContext": {
-      "accountId": "12345678912",
-      "resourceId": "roq9wj",
-      "stage": "testStage",
-      "requestId": "deef4878-7910-11e6-8f14-25afc3e9ae33",
-      "identity": {
-        "cognitoIdentityPoolId": null,
-        "accountId": null,
-        "cognitoIdentityId": null,
-        "caller": null,
-        "apiKey": null,
-        "sourceIp": "192.168.196.186",
-        "cognitoAuthenticationType": null,
-        "cognitoAuthenticationProvider": null,
-        "userArn": null,
-        "userAgent": "PostmanRuntime/2.4.5",
-        "user": null
-      },
-      "resourcePath": "/hello",
-      "httpMethod": "GET",
-      "apiId": "gy415nuibc"
     },
-    "body": "{}",
     "isBase64Encoded": false
 }'
+
+# OUTPUT
+# {"statusCode": 200, "headers": {"content-length": "95", "content-type": "application/json"}, "multiValueHeaders": {}, "body": "{\"message\":\"The server is up since 2023-08-12 03:57:28\",\"start_uct_time\":\"2023-08-12 03:57:28\"}", "isBase64Encoded": false}% 
+
+# TEST Recommend Endpoint
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{
+    "resource": "/recommend",
+    "path": "/recommend",
+    "httpMethod": "POST",
+    "requestContext": {
+        "resourcePath": "/recommend",
+        "httpMethod": "POST"
+    },
+    "body": "{\"movie_ids\": [1, 2, 3, 4], \"user_age\": 23, \"sex\": \"M\", \"topk\": 1}",
+    "isBase64Encoded": false
+}'
+
+#OUTPUT
+# {"statusCode": 200, "headers": {"content-length": "154", "content-type": "application/json"}, "multiValueHeaders": {}, "body": "[{\"movie_id\":50,\"title\":\"Usual Suspects, The (1995)\",\"genres\":[\"Crime\",\"Thriller\"],\"release_year\":1995,\"origin_title\":\"Usual Suspects, The\",\"rating\":5.0}]", "isBase64Encoded": false}% 
+```
