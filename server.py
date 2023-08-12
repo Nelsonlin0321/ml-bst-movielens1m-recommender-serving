@@ -3,6 +3,7 @@ import dotenv
 import logging
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from mangum import Mangum
 from src import utils
 from src.payload import payLoad
 from src.recommender import RecommenderEngine
@@ -21,7 +22,7 @@ if artifact_url is not None:
 recommender_engine = RecommenderEngine(aritifact_dir='./artifacts')
 
 app = FastAPI()
-
+handler = Mangum(app)
 
 @app.post("/recommend")
 async def recommend(pay_load: payLoad):
