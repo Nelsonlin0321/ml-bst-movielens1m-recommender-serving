@@ -177,3 +177,11 @@ docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:late
 ## Test Lambda
 
 <img src="images/test-lambda-console.png"></img>
+
+
+## Deploy
+```sh
+aws lambda update-function-code \
+  --function-name your-lambda-function-name \
+  --image-uri your-ecr-repository:latest
+``` 
