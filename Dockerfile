@@ -1,19 +1,13 @@
-FROM python:3.10-bullseye
+FROM public.ecr.aws/lambda/python:3.10
+# Copy function code
+COPY . ${LAMBDA_TASK_ROOT}
+# Install the function's dependencies using file requirements.txt
+# from your project folder.
+RUN pip3 install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu --target="${LAMBDA_TASK_ROOT}"
 
-# Set the working directory inside the container
-WORKDIR /app
-
-# Install PyTorch
-RUN pip3 install torch --index-url https://download.pytorch.org/whl/cpu
-
-# Copy the requirements.txt file to the working directory
 COPY requirements.txt .
 
-# Install the Python dependencies
-RUN pip install -r requirements.txt
+RUN pip3 install --no-cache-dir  -r requirements.txt --target="${LAMBDA_TASK_ROOT}"
 
-# Copy the rest of the application code to the working directory
-COPY . .
-
-# Set the entrypoint command to run train.py
-ENTRYPOINT ["sh","./boot.sh"]
+# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
+CMD [ "app.handler" ]
