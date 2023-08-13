@@ -262,7 +262,7 @@ curl -X 'POST' \
   "topk": 3
 }'
 ```
-Recommendation Results
+Recommendation Response:
 ```json
 [
     {
@@ -299,4 +299,16 @@ Recommendation Results
         "rating": 5.0
     }
 ]
+```
+
+```sh
+curl -X 'GET' \
+  'https://j87zs9ftf4.execute-api.ap-southeast-1.amazonaws.com/production/healthcheck' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json'
+```
+
+Heathcheck Response:
+```sh
+{"message":"The server is up since 2023-08-13 07:52:09","start_uct_time":"2023-08-13 07:52:09"}
 ```
