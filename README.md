@@ -210,8 +210,12 @@ docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:late
 ### Deploy
 ```sh
 image_name=movielens1m-recommender-lambda
-aws lambda update-function-code --function-name ${image_name} --image-uri $(aws lambda get-function --function-name ${image_name} | jq -r '.Code.ImageUri')
+python ./src/deploy_ecr_image_to_lambda.py \
+       --repository_name ${image_name} \
+       --image_tag latest \
+       --function_name ${image_name}
 ```
+
 
 ### Invoke Lambda
 ```sh

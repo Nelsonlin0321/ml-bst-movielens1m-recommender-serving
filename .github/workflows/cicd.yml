@@ -60,7 +60,10 @@ jobs:
     
     - name: Deploy To AWS Lambda
       run: |
-        aws lambda update-function-code --function-name ${IMAGE_NAME} --image-uri $(aws lambda get-function --function-name ${IMAGE_NAME} | jq -r '.Code.ImageUri')
+        python ./src/deploy_ecr_image_to_lambda.py \
+                --repository_name ${IMAGE_NAME} \
+                 --image_tag latest \
+                 --function_name ${IMAGE_NAME}
       env:
         AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
