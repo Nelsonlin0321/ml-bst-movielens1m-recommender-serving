@@ -278,7 +278,7 @@ Recommendation Response:
         ],
         "release_year": 1995,
         "origin_title": "Usual Suspects, The",
-        "rating": 5.0
+        "predicted_rating": 5.0
     },
     {
         "movie_id": 527,
@@ -289,7 +289,7 @@ Recommendation Response:
         ],
         "release_year": 1993,
         "origin_title": "Schindler's List",
-        "rating": 5.0
+        "predicted_rating": 5.0
     },
     {
         "movie_id": 750,
@@ -300,7 +300,7 @@ Recommendation Response:
         ],
         "release_year": 1963,
         "origin_title": "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
-        "rating": 5.0
+        "predicted_rating": 5.0
     }
 ]
 ```
