@@ -143,7 +143,7 @@ class RecommenderEngine():
                 count = len(ratings[ratings >= self.rating_threshold])
                 cur_count += count
                 if cur_count >= topk:
-                    # if number of movie with predicted rating >= rating threshold, is larger then topk*2, we stop recommendating.
+                    # if number of movie with predicted rating >= rating threshold, is larger then topk, we stop recommendating.
                     break
 
         predicted_ratings = np.concatenate(ratings_list)
