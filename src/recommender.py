@@ -126,8 +126,8 @@ class RecommenderEngine():
     def inference(self, df_input, topk=5) -> pd.DataFrame:
 
         # Improve randomness
-        df_input = shuffle(df_input)
-        inference_dataset = RatingDataset(data=df_input)
+        df_output = shuffle(df_input.copy())
+        inference_dataset = RatingDataset(data=df_output)
         inference_loader = DataLoader(
             inference_dataset, batch_size=self.config.batch_size, shuffle=False)
 
@@ -142,11 +142,12 @@ class RecommenderEngine():
                 ratings_list.append(ratings)
                 count = len(ratings[ratings >= self.rating_threshold])
                 cur_count += count
-                if cur_count >= topk:
-                    # if number of movie with predicted rating >= rating threshold, is larger then topk, we stop recommendating.
+                if cur_count >= topk*2:
+                    # if number of movie with predicted rating >= rating threshold, is larger then topk*2, we stop recommendating.
                     break
+
         predicted_ratings = np.concatenate(ratings_list)
-        df_output = df_input.head(len(predicted_ratings)).copy()
+        df_output = df_output.head(len(predicted_ratings)).copy()
         df_output['predicted_rating'] = predicted_ratings
 
         return df_output
