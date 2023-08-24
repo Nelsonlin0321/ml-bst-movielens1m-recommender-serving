@@ -31,7 +31,7 @@ else:
     raise Exception("ARTIFACTS_URL Env is not set!")
 
 recommender_engine = RecommenderEngine(
-    artifact_dir=aritifact_dir, batch_size=BATCH_SIZE)
+    artifact_dir=aritifact_dir, batch_size=BATCH_SIZE, rating_threshold=0.4)
 
 app = FastAPI()
 

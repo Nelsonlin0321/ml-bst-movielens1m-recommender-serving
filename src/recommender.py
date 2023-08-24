@@ -1,17 +1,18 @@
 import torch
-from .model import BSTRecommenderModel
-from . import utils
 from typing import List, Dict
 import pandas as pd
-from .dataset import RatingDataset
-from torch.utils.data import DataLoader
 import numpy as np
+from torch.utils.data import DataLoader
+from sklearn.utils import shuffle
+from . import utils
+from .model import BSTRecommenderModel
+from .dataset import RatingDataset
 
 
 class RecommenderEngine():
-    def __init__(self, artifact_dir='./artifacts', batch_size=None) -> None:
+    def __init__(self, artifact_dir='./artifacts', batch_size=None, rating_threshold=0.4) -> None:
         self.artifact_dir = artifact_dir
-
+        self.rating_threshold = rating_threshold
         self.config_dict = utils.open_json(
             f"{artifact_dir}/artifacts/config.json")
 
@@ -122,21 +123,33 @@ class RecommenderEngine():
         return lower_limit
 
     @utils.timer
-    def inference(self, df_input) -> pd.DataFrame:
+    def inference(self, df_input, topk=5) -> pd.DataFrame:
 
+        # Improve randomness
+        df_input = shuffle(df_input)
         inference_dataset = RatingDataset(data=df_input)
         inference_loader = DataLoader(
             inference_dataset, batch_size=self.config.batch_size, shuffle=False)
 
-        probs_list = []
-        for inputs in inference_loader:
-            with torch.no_grad():
+        cur_count = 0
+        ratings_list = []
+        with torch.no_grad():
+            for inputs in inference_loader:
                 probs = self.recommende_model(inputs)
-                probs_list.append(probs.cpu().numpy())
+                probs = probs.cpu().numpy()
+                ratings = self.rating_min_max_scaler.inverse_transform(probs)[
+                    :, 0]
+                ratings_list.append(ratings)
+                count = len(ratings[ratings >= self.rating_threshold])
+                cur_count += count
+                if cur_count >= topk:
+                    # if number of movie with predicted rating >= rating threshold, is larger then topk, we stop recommendating.
+                    break
+        predicted_ratings = np.concatenate(ratings_list)
+        df_output = df_input.head(len(predicted_ratings)).copy()
+        df_output['predicted_rating'] = predicted_ratings
 
-        df_input['rating'] = np.concatenate(probs_list)[:, 0]
-
-        return df_input
+        return df_output
 
     @utils.timer
     def postprocess(self, df_input, topk=5):
@@ -146,17 +159,17 @@ class RecommenderEngine():
 
         df_output = df_input.merge(self.movie_info, on=['movie_id'])
 
-        rating = df_output[['rating']].values
-        df_output['rating'] = self.rating_min_max_scaler.inverse_transform(rating)[
-            :, 0]
+        # rating = df_output[['predicted_rating']].values
+        # df_output['predicted_rating'] = self.rating_min_max_scaler.inverse_transform(rating)[
+        #     :, 0]
 
         df_output = df_output.sort_values(
-            by=['rating', 'release_year'], ascending=False)
+            by=['predicted_rating', 'release_year'], ascending=False)
 
         df_output = df_output[df_output.apply(
             lambda x:x['movie_id'] not in x['movie_ids'], axis=1)]
 
-        selected_cols = list(self.movie_info.columns)+['rating']
+        selected_cols = list(self.movie_info.columns)+['predicted_rating']
 
         df_output = df_output[selected_cols]
 
@@ -168,7 +181,7 @@ class RecommenderEngine():
         df_input = self.preprocess(
             movie_ids=movie_ids, user_age=user_age, sex=sex)
 
-        df_inference = self.inference(df_input=df_input)
+        df_inference = self.inference(df_input=df_input, topk=topk)
 
         outputs = self.postprocess(df_input=df_inference, topk=topk)
 
