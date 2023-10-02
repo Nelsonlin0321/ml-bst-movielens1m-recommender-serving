@@ -25,7 +25,6 @@
 | Best practices (DevOps)  | Unit tests in CICD to make sure continue integration | ✔️ |
 | Best practices (DevOps) | Integration test in CICD to make sure continue delivery | ✔️ |
 | Best practices (DevOps) | Implement CI/CD using Github action workflow | ✔️ |
-| Best practices (DevOps) | Implement CI/CD using Github action workflow | ✔️ |
 | Best practices (DevOps) | Terraform Infrastructure as Codes | ✔️ |
 
 
@@ -190,7 +189,7 @@ docker tag ${image_name}:latest ${account_id}.dkr.ecr.${region}.amazonaws.com/${
 docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:latest
 ```
 
-### Deploy TO AWS with Infra Codes:
+### Deploy To AWS with Infra Codes:
 
 ```sh
 cd ./infra
