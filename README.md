@@ -2,9 +2,9 @@
 
 
 ## Introduction
-#### This repository is to deploy transfromered-based movie recommendation as a Serverless API trained by Movielens dataset to predict what movie users like most according to their basic demographic feauture and sequence of movie views.
+#### This repository is to deploy transformer-based movie recommendation as a Serverless API trained by Movielens dataset to predict what movie users like most according to their basic demographic feature and sequence of movie views.
 
-#### Training pipeline is at the different repository: Please refere this github repo: https://github.com/Nelsonlin0321/ml-bst-movielens1m-recommender-training to know more about how we trained the model with MLflow and Prefect Orchestration
+#### Training pipeline is at the different repository: Please refer this github repo: https://github.com/Nelsonlin0321/ml-bst-movielens1m-recommender-training to know more about how we trained the model with MLflow and Prefect Orchestration
 
 
 #### How to deploy your own Mlflow on EC2: Please refer this instruction: https://github.com/Nelsonlin0321/mlops-zoomcamp/blob/main/02-experiment-tracking/mlflow_on_aws.md

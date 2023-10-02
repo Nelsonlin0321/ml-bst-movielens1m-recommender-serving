@@ -1,6 +1,8 @@
 import os
-import dotenv
 import sys
+
+import dotenv
+
 dotenv.load_dotenv("./.env")
 
 curr_dir = os.path.dirname(__file__)

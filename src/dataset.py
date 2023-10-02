@@ -12,15 +12,16 @@ class RatingDataset(Dataset):
 
     def __getitem__(self, index):
         item_dict = self.data.iloc[index].to_dict()
-
+        # pylint: disable=no-member
         dtype_dict = {}
-        for k, v in item_dict.items():
+        for k, _ in item_dict.items():
             dtype_dict[k] = torch.long
         dtype_dict["target_rating"] = torch.float32
         dtype_dict["sex"] = torch.float32
 
         sample = {}
-        for k, v in item_dict.items():
-            sample[k] = torch.tensor(v, dtype=dtype_dict[k]).to(self.device)
+        for key, value in item_dict.items():
+            sample[key] = torch.tensor(
+                value, dtype=dtype_dict[key]).to(self.device)
 
         return sample

@@ -1,50 +1,50 @@
-import os
-import json
-import dotenv
 import logging
-import uvicorn
+import os
 from datetime import datetime
+
+import dotenv
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
+
 from src import utils
-from src.payload import payLoad
+from src.payload import PayLoad
 from src.recommender import RecommenderEngine
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-is_loaded = dotenv.load_dotenv(".env")
-if not is_loaded:
+IS_LOADED = dotenv.load_dotenv(".env")
+if not IS_LOADED:
     logger.info("The env file is not loaded!")
 
 artifact_url = os.getenv("ARTIFACTS_URL")
 BATCH_SIZE = os.getenv("BATCH_SIZE")
 
 if artifact_url is not None:
-    logger.info(f"ARTIFACTS_URL Env is {artifact_url}!")
+    logger.info("ARTIFACTS_URL Env is %s!", artifact_url)
     artifact_root_dir = utils.download_s3_directory(artifact_url, "/tmp")
-    logger.info(f"artifact_root_dir is {artifact_root_dir}!")
-    aritifact_dir = os.path.join(artifact_root_dir, 'artifacts')
-
-
+    logger.info("artifact_root_dir is %s!", artifact_root_dir)
+    artifact_dir = os.path.join(artifact_root_dir, 'artifacts')
 else:
-    raise Exception("ARTIFACTS_URL Env is not set!")
+    raise ValueError("ARTIFACTS_URL Env is not set!")
 
 recommender_engine = RecommenderEngine(
-    artifact_dir=aritifact_dir, batch_size=BATCH_SIZE, rating_threshold=4)
+    artifact_dir=artifact_dir, batch_size=BATCH_SIZE, rating_threshold=4)
 
 app = FastAPI()
 
 
 @app.post("/recommend")
-async def recommend(pay_load: payLoad):
+async def recommend(pay_load: PayLoad):
     try:
         results = recommender_engine.recommend(
             movie_ids=pay_load.movie_ids, user_age=pay_load.user_age,
             sex=pay_load.sex, topk=pay_load.topk)
-    except Exception as e:
-        logging.error(e)
-        return HTTPException(status_code=500, detail=str(e))
+    # # pylint: disable=broad-exception-caught
+    except Exception as error:
+        logging.error(error)
+        return HTTPException(status_code=500, detail=str(error))
     return results
 
 
