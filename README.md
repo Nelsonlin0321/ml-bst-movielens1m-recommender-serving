@@ -20,15 +20,18 @@
 | Experiment tracking and model registry  | We track the model training experiment and register models using [Mlflow](https://mlflow.org/)  | ✔️ |
 | Workflow Orchestration| We use [Prefect](https://www.prefect.io/) orchestract training data pipeline   | ✔️ |
 | Model deployment| Model with FastAPI Deployed to AWS Lambda With API Gateway   | ✔️ |
-| Reproducibility | We log all training artifatct to make sure reproducibility| ✔️ |
+| Reproducibility | We log all training artifact to make sure reproducibility| ✔️ |
+| Best practices (DevOps) | Pylint static code analysis | ✔️ |
 | Best practices (DevOps)  | Unit tests in CICD to make sure continue integration | ✔️ |
 | Best practices (DevOps) | Integration test in CICD to make sure continue delivery | ✔️ |
-| Best practices (DevOps) | We impletment CI/CD using Github action workflow | ✔️ |
+| Best practices (DevOps) | Implement CI/CD using Github action workflow | ✔️ |
+| Best practices (DevOps) | Implement CI/CD using Github action workflow | ✔️ |
+| Best practices (DevOps) | Terraform Infrastructure as Codes | ✔️ |
 
 
-## Guildance to Deploy
+## Guidance to Deploy
 
-### Environmenet Settings
+### Environment Settings
 
 .env file
 
