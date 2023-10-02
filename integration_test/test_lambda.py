@@ -1,10 +1,11 @@
 import os
-
+import json
 import boto3
 import dotenv
 
 REGION = os.getenv("AWS_DEFAULT_REGION", "ap-southeast-1")
-FunctionName = os.getenv("IMAGE_NAME", "movielens1m-recommender-lambda")
+FunctionName = os.getenv(
+    "FUNC_NAME", "movielens1m-transformer-based-recommender-lambda")
 dotenv.load_dotenv("./../.env")
 
 session = boto3.Session(region_name=REGION)
@@ -18,7 +19,12 @@ response = lambda_client.invoke(
     FunctionName=FunctionName,
     Payload=payload
 )
-print(response['Payload'].read())
+
+response = json.loads(response['Payload'].read().decode('utf-8'))
+
+print(response)
+
+assert response['statusCode'] == 200
 
 with open("./integration_test/test_recommend_payload.json", mode='r', encoding='utf-8') as f:
     payload = f.read()
@@ -28,4 +34,8 @@ response = lambda_client.invoke(
     Payload=payload
 )
 
-print(response['Payload'].read())
+response = json.loads(response['Payload'].read().decode('utf-8'))
+
+print(response)
+
+assert response['statusCode'] == 200
