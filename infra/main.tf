@@ -90,8 +90,8 @@ resource "aws_iam_role_policy_attachment" "lambda_s3_access_policy_attachment" {
 resource "aws_lambda_function" "movielens1m_recommender_lambda" {
   function_name = var.lambda_function_name
 
-  timeout      = 300
-  memory_size  = 512
+  timeout      = 5
+  memory_size  = 720
   image_uri     = "${var.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.ecr_repository_name}:latest"
   package_type  = "Image"
   architectures = ["x86_64"]
