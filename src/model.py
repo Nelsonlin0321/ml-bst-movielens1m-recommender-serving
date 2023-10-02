@@ -1,5 +1,7 @@
-from torch import nn
 import torch
+from torch import nn
+
+# pylint: disable=invalid-name,no-member
 
 
 class TransformerBlock(nn.Module):
@@ -46,7 +48,9 @@ class TransformerLayer(nn.Module):
 
 
 class MLP(nn.Module):
-    def __init__(self, dropout=0.2, hidden_units=[512, 256, 128]):
+    def __init__(self, dropout=0.2, hidden_units=None):
+        if hidden_units is None:
+            hidden_units = [512, 256, 128]
         super(MLP, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.layers = nn.ModuleList()
@@ -71,7 +75,7 @@ class BSTRecommenderModel(nn.Module):
 
         self.config = config
         self.embed_configs = config.embed_configs
-        self.drouput = config.dropout
+        self.dropout = config.dropout
         self.transformer_num_layer = config.transformer_num_layer
         self.device = config.device
 
@@ -82,10 +86,10 @@ class BSTRecommenderModel(nn.Module):
         for name, embed_config in embed_configs.items():
             embed_dim = embed_config['embed_dim']
             num_embed = embed_config['num_embed']
-            embeding_layer = nn.Embedding(
+            embedding_layer = nn.Embedding(
                 num_embeddings=num_embed, embedding_dim=embed_dim)
-            nn.init.xavier_uniform_(embeding_layer.weight)
-            embedding_layers.append([name, embeding_layer])
+            nn.init.xavier_uniform_(embedding_layer.weight)
+            embedding_layers.append([name, embedding_layer])
 
         self.embedding_layers = nn.ModuleDict(embedding_layers)
 
@@ -95,7 +99,7 @@ class BSTRecommenderModel(nn.Module):
 
         self.transformer_layer = TransformerLayer(d_model=transformer_dim,
                                                   num_heads=8,
-                                                  dropout_rate=self.drouput,
+                                                  dropout_rate=self.dropout,
                                                   num_layers=self.transformer_num_layer)
 
         user_features_dim = 1+self.embed_configs['movie']['embed_dim'] + \
@@ -104,7 +108,8 @@ class BSTRecommenderModel(nn.Module):
         sequence_length = self.embed_configs['position']['num_embed']
 
         mlp_dim = transformer_dim*sequence_length + user_features_dim
-        self.mlp = MLP(dropout=self.drouput, hidden_units=[mlp_dim, 256, 64])
+        self.mlp = MLP(dropout=self.dropout, hidden_units=[mlp_dim, 256, 64])
+    # pylint:disable=too-many-locals
 
     def forward(self, inputs):
 
@@ -116,14 +121,14 @@ class BSTRecommenderModel(nn.Module):
             inputs['movie_sequence'])
 
         # genres
-        genres_sequence_emebdding = self.embedding_layers['genre'](
+        genres_sequence_embedding = self.embedding_layers['genre'](
             inputs['genres_ids_sequence'])
 
         # genres max pooling
-        genres_sequence_emebdding = torch.mean(
-            genres_sequence_emebdding, dim=-2)
-        genres_sequence_cross_target_movie_emebdding = torch.mul(
-            genres_sequence_emebdding, target_movie_embedding.view(
+        genres_sequence_embedding = torch.mean(
+            genres_sequence_embedding, dim=-2)
+        genres_sequence_cross_target_movie_embedding = torch.mul(
+            genres_sequence_embedding, target_movie_embedding.view(
                 batch_size, 1, -1)
         )
 
@@ -136,7 +141,7 @@ class BSTRecommenderModel(nn.Module):
 
         movie_pos_genres_seq_embedding = torch.concat(
             [movie_sequence_embedding,
-             genres_sequence_cross_target_movie_emebdding,
+             genres_sequence_cross_target_movie_embedding,
              batch_position_embedding], dim=-1)
 
         seq_transformer_output = self.transformer_layer(
@@ -156,7 +161,8 @@ class BSTRecommenderModel(nn.Module):
             age_group_embedding, target_movie_embedding)
 
         user_input_features = torch.concat(
-            [sex_feature, sex_cross_feature, age_group_embedding, age_group_embedding_cross], dim=-1)
+            [sex_feature, sex_cross_feature,
+             age_group_embedding, age_group_embedding_cross], dim=-1)
 
         mlp_input_features = torch.concat(
             [user_input_features, seq_transformer_flatten_output], dim=1)

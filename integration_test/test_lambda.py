@@ -1,6 +1,8 @@
 import os
+
 import boto3
 import dotenv
+
 REGION = os.getenv("AWS_DEFAULT_REGION", "ap-southeast-1")
 FunctionName = os.getenv("IMAGE_NAME", "movielens1m-recommender-lambda")
 dotenv.load_dotenv("./../.env")

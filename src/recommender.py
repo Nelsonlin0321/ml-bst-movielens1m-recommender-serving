@@ -1,12 +1,15 @@
-import torch
-from typing import List, Dict
-import pandas as pd
+from typing import Dict, List
+
 import numpy as np
-from torch.utils.data import DataLoader
+import pandas as pd
+import torch
 from sklearn.utils import shuffle
+from torch.utils.data import DataLoader
+
+# pylint: disable=no-name-in-module,relative-beyond-top-level
 from . import utils
-from .model import BSTRecommenderModel
 from .dataset import RatingDataset
+from .model import BSTRecommenderModel
 
 
 class RecommenderEngine():
@@ -16,15 +19,15 @@ class RecommenderEngine():
         self.config_dict = utils.open_json(
             f"{artifact_dir}/artifacts/config.json")
 
-        self.config = utils.Config(dict=self.config_dict)
+        self.config = utils.Config(dictionary=self.config_dict)
 
         if batch_size is not None:
             self.config.batch_size = int(batch_size)
 
-        self.recommende_model = BSTRecommenderModel(config=self.config)
+        self.model = BSTRecommenderModel(config=self.config)
         self.sequence_length = self.config_dict['sequence_length']
 
-        self.recommende_model.load_state_dict(
+        self.model.load_state_dict(
             torch.load(f"{artifact_dir}/model/pytorch_model.pt"))
 
         self.movie_id_map_dict = utils.open_object(
@@ -135,7 +138,7 @@ class RecommenderEngine():
         ratings_list = []
         with torch.no_grad():
             for inputs in inference_loader:
-                probs = self.recommende_model(inputs)
+                probs = self.model(inputs)
                 probs = probs.cpu().numpy()
                 ratings = self.rating_min_max_scaler.inverse_transform(probs)[
                     :, 0]
@@ -143,7 +146,9 @@ class RecommenderEngine():
                 count = len(ratings[ratings >= self.rating_threshold])
                 cur_count += count
                 if cur_count >= topk:
-                    # if number of movie with predicted rating >= rating threshold, is larger then topk, we stop recommendating.
+                    # if number of movie with predicted rating >= rating threshold,
+                    # is larger then topk,
+                    # we stop recommending.
                     break
 
         predicted_ratings = np.concatenate(ratings_list)

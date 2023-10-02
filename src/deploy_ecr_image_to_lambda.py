@@ -1,5 +1,7 @@
-import boto3
 import argparse
+
+import boto3
+
 parser = argparse.ArgumentParser(
     description='utils to deploy to ecr image url to lambda')
 
@@ -11,6 +13,8 @@ parser.add_argument('--image_tag', type=str, required=True,
 
 parser.add_argument('--function_name', type=str, required=True,
                     default="movielens1m-recommender-lambda")
+
+# pylint:disable=redefined-outer-name,invalid-name,broad-exception-raised
 
 
 def get_image_url(repository_name="movielens1m-recommender-lambda", image_tag="latest"):
@@ -46,8 +50,8 @@ def deploy_image_to_lambda(function_name, image_url):
 
     if response['ResponseMetadata']['HTTPStatusCode'] != 200:
         raise Exception(response)
-    else:
-        print(f"Deploy To Lambda Successfully With Image URL: {image_url}!")
+
+    print(f"Deploy To Lambda Successfully With Image URL: {image_url}!")
 
 
 if __name__ == "__main__":

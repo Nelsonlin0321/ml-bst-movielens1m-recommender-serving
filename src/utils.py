@@ -1,15 +1,18 @@
-import pickle
-import os
 import json
-import re
-import boto3
-import time
-from tqdm import tqdm
 import logging
+import os
+import pickle
+import subprocess
+import time
+
+from tqdm import tqdm
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGION = os.getenv("AWS_DEFAULT_REGION", "ap-southeast-1")
+
+# pylint: disable=invalid-name
 
 
 def save_json(json_object, file_path):
@@ -35,24 +38,27 @@ def save_object(object_path, obj):
     with open(object_path, mode='wb') as f:
         pickle.dump(obj, f)
 
+# pylint:disable=too-few-public-methods
+
 
 class Config:
-    def __init__(self, dict):
-        self.dict = dict
-        for key, value in dict.items():
+    def __init__(self, dictionary):
+        self.dictionary = dictionary
+        for key, value in dictionary.items():
             setattr(self, key, value)
 
 
 def download_s3_directory(s3_directory, local_directory="/tmp"):
-    import subprocess
-    output = subprocess.run(["aws", "s3", "cp", s3_directory,
-                             local_directory, '--recursive', "--region", REGION], capture_output=True)
 
+    output = subprocess.run(["aws", "s3", "cp", s3_directory,
+                             local_directory, '--recursive', "--region", REGION],
+                            capture_output=True, check=False)
+    # pylint: disable=broad-exception-raised
     if output.returncode == 1:
         raise Exception(output.stderr.decode("utf-8"))
-    else:
-        message = output.stdout.decode("utf-8")
-        logger.info(f"S3 Download Log:{message}")
+
+    message = output.stdout.decode("utf-8")
+    logger.info("S3 Download Log: %s", message)
 
     return os.path.abspath(local_directory)
 
@@ -90,7 +96,9 @@ def timer(func):
     return wrapper
 
 
-def recursively_listdir(dir_path, extensions=[''], with_tqdm=False):
+def recursively_listdir(dir_path, extensions=None, with_tqdm=False):
+    if extensions is None:
+        extensions = ['']
 
     dir_path = os.path.abspath(dir_path)
     if not os.path.isdir(dir_path):
@@ -100,7 +108,7 @@ def recursively_listdir(dir_path, extensions=[''], with_tqdm=False):
     file_paths = listdir_with_full_path(dir_path)
     if with_tqdm:
         file_paths = tqdm(file_paths, position=0, leave=True,
-                          desc=f"INFO: Scaning files under the folder {dir_path}")
+                          desc=f"INFO: Scanning files under the folder {dir_path}")
     for file_path in file_paths:
         if os.path.isdir(file_path):
             file_list_under_dir = recursively_listdir(
