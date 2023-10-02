@@ -20,15 +20,17 @@
 | Experiment tracking and model registry  | We track the model training experiment and register models using [Mlflow](https://mlflow.org/)  | ✔️ |
 | Workflow Orchestration| We use [Prefect](https://www.prefect.io/) orchestract training data pipeline   | ✔️ |
 | Model deployment| Model with FastAPI Deployed to AWS Lambda With API Gateway   | ✔️ |
-| Reproducibility | We log all training artifatct to make sure reproducibility| ✔️ |
+| Reproducibility | We log all training artifact to make sure reproducibility| ✔️ |
+| Best practices (DevOps) | Pylint static code analysis | ✔️ |
 | Best practices (DevOps)  | Unit tests in CICD to make sure continue integration | ✔️ |
 | Best practices (DevOps) | Integration test in CICD to make sure continue delivery | ✔️ |
-| Best practices (DevOps) | We impletment CI/CD using Github action workflow | ✔️ |
+| Best practices (DevOps) | Implement CI/CD using Github action workflow | ✔️ |
+| Best practices (DevOps) | Terraform Infrastructure as Codes | ✔️ |
 
 
-## Guildance to Deploy
+## Guidance to Deploy
 
-### Environmenet Settings
+### Environment Settings
 
 .env file
 
@@ -94,7 +96,7 @@ fastapi docs swagger for information: the http://0.0.0.0:8000/docs
 
 ```sh
 curl -X 'POST' \
-  'http://0.0.0.0:8000/recommend' \
+  'http://0.0.0.0:5050/recommend' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -187,70 +189,34 @@ docker tag ${image_name}:latest ${account_id}.dkr.ecr.${region}.amazonaws.com/${
 docker push ${account_id}.dkr.ecr.ap-southeast-1.amazonaws.com/${repo_name}:latest
 ```
 
-### Create a lambda function using ECR image:
+### Deploy To AWS with Infra Codes:
 
-<img src="images/create-lambda.png"></img>
-
-### Config Env Varialble
-<img src="images/lambda-env-config.png"></img>
-
-### Congig Permission with AWS Role
-
-#### Create Role with S3 MLflow artifacts read access
-<img src="images/s3-mlflow-s3-artifacst-policy.png"></img>
-
-#### Attach policy to lambda role
-<img src="images/lambda-role-policy.png"></img>
-
-### Test Lambda
-
-<img src="images/test-lambda-console.png"></img>
-
-
-### Deploy
 ```sh
-image_name=movielens1m-recommender-lambda
-python ./src/deploy_ecr_image_to_lambda.py \
-       --repository_name ${image_name} \
-       --image_tag latest \
-       --function_name ${image_name}
+cd ./infra
+terraform init
+terraform apply
 ```
 
-
-### Invoke Lambda
+### Get API URL
 ```sh
-image_name=movielens1m-recommender-lambda
-payload=$(cat integration_test/test_recommend_payload.json)
-aws lambda invoke \
-  --function-name ${image_name} \
-  --payload ${payload} \
-    response.json
+terraform output -json > ./output.json
 ```
 
-### Build a Serverless API With API Gateway
-<img src="images/create-api-gateway.png"></img>
+```json
+{
+  "apigateway_invoke_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "https://7jufjyexya.execute-api.ap-southeast-1.amazonaws.com/prod"
+  }
+}
+```
 
-
-#### Create "recommend" endpoint
-
-<img src="images/recommend-api-endpoint.png"></img>
-
-#### Create POST Method Recommendation API
-
-
-<img src="images/recommend-api-setup.png"></img>
-
-#### Test You API
-<img src="images/test-api-gateway.png"></img>
-
-
-#### Deploy To API Gateway
-
-<img src="images/deploy-to-production.png"></img>
+### Test API
 
 ```sh
 curl -X 'POST' \
-  'https://j87zs9ftf4.execute-api.ap-southeast-1.amazonaws.com/production/recommend' \
+  'https://7jufjyexya.execute-api.ap-southeast-1.amazonaws.com/prod/recommend' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -307,12 +273,12 @@ Recommendation Response:
 
 ```sh
 curl -X 'GET' \
-  'https://j87zs9ftf4.execute-api.ap-southeast-1.amazonaws.com/production/healthcheck' \
+  'https://7jufjyexya.execute-api.ap-southeast-1.amazonaws.com/prod/healthcheck' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json'
 ```
 
-Heathcheck Response:
+heathcheck Response:
 ```sh
 {"message":"The server is up since 2023-08-13 07:52:09","start_uct_time":"2023-08-13 07:52:09"}
 ```
