@@ -5,6 +5,7 @@ from datetime import datetime
 import dotenv
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from src import utils
@@ -57,6 +58,18 @@ start_time = start_time.strftime(DATE_FORMAT)
 async def healthcheck():
     response = f'The server is up since {start_time}'
     return {"message": response, 'start_uct_time': start_time}
+
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 handler = Mangum(app)
 
