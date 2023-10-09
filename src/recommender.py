@@ -1,5 +1,4 @@
-from typing import Dict, List
-
+from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 import torch
@@ -13,7 +12,7 @@ from .model import BSTRecommenderModel
 
 
 class RecommenderEngine():
-    def __init__(self, artifact_dir='./artifacts', batch_size=None, rating_threshold=0.4) -> None:
+    def __init__(self, artifact_dir='./artifacts', batch_size=None, rating_threshold=4.5) -> None:
         self.artifact_dir = artifact_dir
         self.rating_threshold = rating_threshold
         self.config_dict = utils.open_json(
@@ -126,7 +125,7 @@ class RecommenderEngine():
         return lower_limit
 
     @utils.timer
-    def inference(self, df_input, topk=5) -> pd.DataFrame:
+    def inference(self, df_input, topk=5, rating_threshold: Optional[float] = None) -> pd.DataFrame:
 
         # Improve randomness
         df_output = shuffle(df_input.copy())
@@ -143,7 +142,8 @@ class RecommenderEngine():
                 ratings = self.rating_min_max_scaler.inverse_transform(probs)[
                     :, 0]
                 ratings_list.append(ratings)
-                count = len(ratings[ratings >= self.rating_threshold])
+                rating_threshold = rating_threshold if rating_threshold else self.rating_threshold
+                count = len(ratings[ratings >= rating_threshold])
                 cur_count += count
                 if cur_count >= topk:
                     # if number of movie with predicted rating >= rating threshold,
@@ -183,11 +183,14 @@ class RecommenderEngine():
 
         return results
 
-    def recommend(self, movie_ids: List[int], user_age: int, sex: str, topk=5) -> List[Dict]:
+    def recommend(self, movie_ids: List[int], user_age: int, sex: str,
+                  rating_threshold: float = 4.5, topk=5) -> List[Dict]:
         df_input = self.preprocess(
             movie_ids=movie_ids, user_age=user_age, sex=sex)
 
-        df_inference = self.inference(df_input=df_input, topk=topk)
+        df_inference = self.inference(
+            df_input=df_input, topk=topk,
+            rating_threshold=rating_threshold)
 
         outputs = self.postprocess(df_input=df_inference, topk=topk)
 
