@@ -8,4 +8,4 @@ class PayLoad(BaseModel):
     user_age: int = 20
     sex: str = 'M'
     topk: int = 3
-    rating_threshold: float
+    rating_threshold: float = 4.5
