@@ -17,6 +17,6 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d
         "resourcePath": "/recommend",
         "httpMethod": "POST"
     },
-    "body": "{\"movie_ids\": [1, 2, 3, 4], \"user_age\": 23, \"sex\": \"M\", \"topk\": 1}",
+    "body": "{\"movie_ids\": [1, 2, 3, 4], \"user_age\": 23, \"sex\": \"M\", \"topk\": 1, \"rating_threshold\": 4.8}",
     "isBase64Encoded": false
 }'

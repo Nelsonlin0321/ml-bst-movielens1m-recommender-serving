@@ -2,7 +2,6 @@
     "resource": "/healthcheck",
     "path": "/healthcheck",
     "httpMethod": "GET",
-    "requestContext": {
-    },
+    "requestContext": {},
     "isBase64Encoded": false
 }

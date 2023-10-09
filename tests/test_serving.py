@@ -9,6 +9,8 @@ curr_dir = os.path.dirname(__file__)
 root_dir = os.path.dirname(curr_dir)
 sys.path.append(root_dir)
 
+# pylint: disable=import-outside-toplevel
+
 
 def test_download_artifact():
 
@@ -28,9 +30,11 @@ def test_model_serving():
     user_age = 23
     sex = "M"
     topk = 10
+    rating_threshold = 4.8
 
+    # pylint: disable=unexpected-keyword-arg
     results = recommender_engine.recommend(
         movie_ids=movie_ids, user_age=user_age,
-        sex=sex, topk=topk)
+        sex=sex, topk=topk, rating_threshold=rating_threshold)
 
     assert len(results) == topk

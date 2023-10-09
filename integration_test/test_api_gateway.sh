@@ -13,4 +13,5 @@ curl -X 'POST' \
   "user_age": 20,
   "sex": "M",
   "topk": 3
+  "rating_threshold":4.8
 }'
