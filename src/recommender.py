@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 import numpy as np
 import pandas as pd
 import torch
@@ -54,10 +54,15 @@ class RecommenderEngine():
         self.movie_info['genres'] = self.movie_info['genres'].apply(
             lambda x: x.tolist())
 
+        self.movie_id_genre_dict = self.movie_info[['movie_id', 'genres']].set_index(
+            "movie_id")['genres'].to_dict()
+
     @utils.timer
     def preprocess(self, movie_ids: List[int], user_age: int, sex: str) -> pd.DataFrame:
 
         df_input = pd.DataFrame()
+        df_input["movie_id"] = df_input["target_movie"].map(
+            self.reverse_movie_id_map_dict)
 
         # loop for each movie
         target_movies = list(self.movie_id_map_dict.values())
@@ -125,14 +130,13 @@ class RecommenderEngine():
         return lower_limit
 
     @utils.timer
-    def inference(self, df_input, topk=5, rating_threshold: Optional[float] = None) -> pd.DataFrame:
+    def inference(self, df_input, input_genres: Set, topk=5, rating_threshold: Optional[float] = None) -> pd.DataFrame:
 
         # Improve randomness
         df_output = shuffle(df_input.copy())
         inference_dataset = RatingDataset(data=df_output)
         inference_loader = DataLoader(
             inference_dataset, batch_size=self.config.batch_size, shuffle=False)
-
         cur_count = 0
         ratings_list = []
         with torch.no_grad():
@@ -141,8 +145,16 @@ class RecommenderEngine():
                 probs = probs.cpu().numpy()
                 ratings = self.rating_min_max_scaler.inverse_transform(probs)[
                     :, 0]
-                ratings_list.append(ratings)
+
+                df_tmp = pd.DataFrame(ratings, columns=['predicted_rating'])
+                df_tmp['movie_id'] = inputs["movie_id"].cpu().numpy()
+                
+                df_tmp['genres'] = df_tmp['movie_id'].map(
+                    self.movie_id_genre_dict)
+
                 rating_threshold = rating_threshold if rating_threshold else self.rating_threshold
+                df_tmp = df_tmp[df_tmp["predicted_rating" >= rating_threshold]]
+                df_tmp = df_tmp[]
                 count = len(ratings[ratings >= rating_threshold])
                 cur_count += count
                 if cur_count >= topk:
@@ -185,12 +197,17 @@ class RecommenderEngine():
 
     def recommend(self, movie_ids: List[int], user_age: int, sex: str,
                   rating_threshold: float = 4.8, topk=5) -> List[Dict]:
+
+        input_genres = set(self.movie_info[self.movie_info.movie_id.isin(
+            movie_ids)]['genres'].explode())
+
         df_input = self.preprocess(
             movie_ids=movie_ids, user_age=user_age, sex=sex)
 
         df_inference = self.inference(
             df_input=df_input, topk=topk,
-            rating_threshold=rating_threshold)
+            rating_threshold=rating_threshold,
+            input_genres=input_genres)
 
         outputs = self.postprocess(df_input=df_inference, topk=topk)
 
