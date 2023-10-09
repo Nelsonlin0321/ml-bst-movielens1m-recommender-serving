@@ -167,3 +167,7 @@ venv
 docker.env
 .env
 response.json
+infra/.terraform.lock.hcl
+infra/.terraform/providers/registry.terraform.io/hashicorp/aws/5.19.0/darwin_arm64/terraform-provider-aws_v5.19.0_x5
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
