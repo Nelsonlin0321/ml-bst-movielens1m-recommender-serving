@@ -1,5 +1,4 @@
-from typing import Dict, List, Optional, Set, Tuple
-import numpy as np
+from typing import Dict, List, Optional, Set
 import pandas as pd
 import torch
 from sklearn.utils import shuffle
@@ -9,6 +8,13 @@ from torch.utils.data import DataLoader
 from . import utils
 from .dataset import RatingDataset
 from .model import BSTRecommenderModel
+
+
+def contains_input_genres(genres, input_genres):
+    for g in genres:
+        if g in input_genres:
+            return True
+    return False
 
 
 class RecommenderEngine():
@@ -38,7 +44,7 @@ class RecommenderEngine():
         self.age_group_id_map_dict = utils.open_object(
             f"{artifact_dir}/artifacts/age_group_id_map_dict.pkl")
 
-        self.sex_id_map_dict = {"Male": 0.0, "Female": 1.0, "UNK": 0.5}
+        self.sex_id_map_dict = {"M": 0.0, "F": 1.0, "UNK": 0.5}
         self.rating_min_max_scaler = utils.open_object(
             f"{artifact_dir}/artifacts/rating_min_max_scaler.pkl")
 
@@ -60,14 +66,10 @@ class RecommenderEngine():
     @utils.timer
     def preprocess(self, movie_ids: List[int], user_age: int, sex: str) -> pd.DataFrame:
 
-        df_input = pd.DataFrame()
-        df_input["movie_id"] = df_input["target_movie"].map(
-            self.reverse_movie_id_map_dict)
+        df_input = self.movie_info.copy()
 
-        # loop for each movie
-        target_movies = list(self.movie_id_map_dict.values())
-        target_movies.remove(self.movie_id_map_dict["UNK"])
-        df_input["target_movie"] = target_movies
+        df_input["target_movie"] = df_input['movie_id'].map(
+            self.movie_id_map_dict)
 
         # encode movie id
         df_input['movie_ids'] = [movie_ids.copy()
@@ -133,65 +135,54 @@ class RecommenderEngine():
     def inference(self, df_input, input_genres: Set, topk=5, rating_threshold: Optional[float] = None) -> pd.DataFrame:
 
         # Improve randomness
-        df_output = shuffle(df_input.copy())
+        df_output = shuffle(df_input)
         inference_dataset = RatingDataset(data=df_output)
         inference_loader = DataLoader(
             inference_dataset, batch_size=self.config.batch_size, shuffle=False)
-        cur_count = 0
-        ratings_list = []
+
+        df_list = []
+        curr_count = 0
+
+        start = 0
         with torch.no_grad():
             for inputs in inference_loader:
                 probs = self.model(inputs)
                 probs = probs.cpu().numpy()
                 ratings = self.rating_min_max_scaler.inverse_transform(probs)[
                     :, 0]
-
-                df_tmp = pd.DataFrame(ratings, columns=['predicted_rating'])
-                df_tmp['movie_id'] = inputs["movie_id"].cpu().numpy()
-                
-                df_tmp['genres'] = df_tmp['movie_id'].map(
-                    self.movie_id_genre_dict)
+                end = start+len(ratings)
+                df_tmp = df_output.iloc[start:end].copy()
+                start = end
+                df_tmp["predicted_rating"] = ratings
 
                 rating_threshold = rating_threshold if rating_threshold else self.rating_threshold
-                df_tmp = df_tmp[df_tmp["predicted_rating" >= rating_threshold]]
-                df_tmp = df_tmp[]
-                count = len(ratings[ratings >= rating_threshold])
-                cur_count += count
-                if cur_count >= topk:
+                df_tmp = df_tmp[df_tmp["predicted_rating"] >= rating_threshold]
+                df_tmp = df_tmp[df_tmp['genres'].apply(
+                    lambda x: contains_input_genres(x, input_genres))]
+                df_tmp = df_tmp[df_tmp.apply(
+                    lambda x:x['movie_id'] not in x['movie_ids'], axis=1)]
+                df_list.append(df_tmp)
+                curr_count += len(df_tmp)
+                if curr_count >= topk:
                     # if number of movie with predicted rating >= rating threshold,
                     # is larger then topk,
                     # we stop recommending.
                     break
 
-        predicted_ratings = np.concatenate(ratings_list)
-        df_output = df_output.head(len(predicted_ratings)).copy()
-        df_output['predicted_rating'] = predicted_ratings
+        df_inference = pd.concat(df_list, axis=0)
 
-        return df_output
+        return df_inference
 
     @utils.timer
-    def postprocess(self, df_input, topk=5):
-
-        df_input["movie_id"] = df_input["target_movie"].map(
-            self.reverse_movie_id_map_dict)
-
-        df_output = df_input.merge(self.movie_info, on=['movie_id'])
-
-        # rating = df_output[['predicted_rating']].values
-        # df_output['predicted_rating'] = self.rating_min_max_scaler.inverse_transform(rating)[
-        #     :, 0]
-
-        df_output = df_output.sort_values(
-            by=['predicted_rating', 'release_year'], ascending=False)
-
-        df_output = df_output[df_output.apply(
-            lambda x:x['movie_id'] not in x['movie_ids'], axis=1)]
+    def postprocess(self, df_inference, topk=5):
 
         selected_cols = list(self.movie_info.columns)+['predicted_rating']
+        df_inference = df_inference[selected_cols]
 
-        df_output = df_output[selected_cols]
+        df_inference = df_inference.sort_values(
+            by=['predicted_rating'], ascending=False)
 
-        results = df_output.head(topk).to_dict(orient='records')
+        results = df_inference.head(topk).to_dict(orient='records')
 
         return results
 
@@ -209,6 +200,6 @@ class RecommenderEngine():
             rating_threshold=rating_threshold,
             input_genres=input_genres)
 
-        outputs = self.postprocess(df_input=df_inference, topk=topk)
+        outputs = self.postprocess(df_inference=df_inference, topk=topk)
 
         return outputs
