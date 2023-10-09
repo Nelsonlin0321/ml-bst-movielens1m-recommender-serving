@@ -31,17 +31,18 @@ else:
     raise ValueError("ARTIFACTS_URL Env is not set!")
 
 recommender_engine = RecommenderEngine(
-    artifact_dir=artifact_dir, batch_size=BATCH_SIZE, rating_threshold=4)
+    artifact_dir=artifact_dir, batch_size=BATCH_SIZE, rating_threshold=4.5)
 
 app = FastAPI()
 
 
 @app.post("/recommend")
 async def recommend(pay_load: PayLoad):
+    # pylint: disable=unexpected-keyword-arg
     try:
         results = recommender_engine.recommend(
             movie_ids=pay_load.movie_ids, user_age=pay_load.user_age,
-            sex=pay_load.sex, topk=pay_load.topk)
+            sex=pay_load.sex, topk=pay_load.topk, rating_threshold=pay_load.rating_threshold)
     # # pylint: disable=broad-exception-caught
     except Exception as error:
         logging.error(error)
