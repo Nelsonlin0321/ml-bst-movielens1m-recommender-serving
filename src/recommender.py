@@ -184,7 +184,7 @@ class RecommenderEngine():
         return results
 
     def recommend(self, movie_ids: List[int], user_age: int, sex: str,
-                  rating_threshold: float = 4.5, topk=5) -> List[Dict]:
+                  rating_threshold: float = 4.8, topk=5) -> List[Dict]:
         df_input = self.preprocess(
             movie_ids=movie_ids, user_age=user_age, sex=sex)
 
