@@ -20,7 +20,7 @@ def test_download_artifact():
     download_s3_directory(artifact_url)
 
 
-def test_model_serving():
+def test_recommendation_endpoint():
 
     from src.recommender import RecommenderEngine
 
@@ -38,3 +38,24 @@ def test_model_serving():
         sex=sex, topk=topk, rating_threshold=rating_threshold)
 
     assert len(results) == topk
+
+
+def test_get_scores_endpoint():
+
+    from src.recommender import RecommenderEngine
+
+    recommender_engine = RecommenderEngine(artifact_dir='./artifacts')
+
+    viewed_movie_ids = [1, 2, 3, 4, 5]
+    suggested_movie_ids = [5, 6, 7, 8, 9, 10]
+    user_age = 23
+    sex = "M"
+
+    # pylint: disable=unexpected-keyword-arg
+    results = recommender_engine.get_scores(
+        viewed_movie_ids=viewed_movie_ids,
+        user_age=user_age,
+        sex=sex,
+        suggested_movie_ids=suggested_movie_ids)
+
+    assert len(results) == len(suggested_movie_ids)
