@@ -40,7 +40,7 @@ def test_recommendation_endpoint():
     assert len(results) == topk
 
 
-def test_get_score_endpoint():
+def test_get_scores_endpoint():
 
     from src.recommender import RecommenderEngine
 
