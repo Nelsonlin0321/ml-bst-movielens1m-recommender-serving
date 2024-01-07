@@ -18,9 +18,9 @@ def contains_input_genres(genres, input_genres):
 
 
 class RecommenderEngine():
-    def __init__(self, artifact_dir='./artifacts', batch_size=None, rating_threshold=4.5) -> None:
-        self.artifact_dir = artifact_dir
+    def __init__(self, artifact_dir='./artifacts', batch_size=None, rating_threshold: float = 4.0) -> None:
         self.rating_threshold = rating_threshold
+        self.artifact_dir = artifact_dir
         self.config_dict = utils.open_json(
             f"{artifact_dir}/artifacts/config.json")
 
@@ -64,9 +64,9 @@ class RecommenderEngine():
             "movie_id")['genres'].to_dict()
 
     @utils.timer
-    def preprocess(self, movie_ids: List[int], user_age: int, sex: str) -> pd.DataFrame:
+    def preprocess(self, movie_ids: List[int], user_age: int, sex: str, movie_info: pd.DataFrame) -> pd.DataFrame:
 
-        df_input = self.movie_info.copy()
+        df_input = movie_info.copy()
 
         df_input["target_movie"] = df_input['movie_id'].map(
             self.movie_id_map_dict)
@@ -132,7 +132,10 @@ class RecommenderEngine():
         return lower_limit
 
     @utils.timer
-    def inference(self, df_input, input_genres: Set, topk=5, rating_threshold: Optional[float] = None) -> pd.DataFrame:
+    def inference(self, df_input,
+                  input_genres: Set = None,
+                  topk=None,
+                  rating_threshold: Optional[float] = None, include_input_movies=True) -> pd.DataFrame:
 
         # Improve randomness
         df_output = shuffle(df_input)
@@ -155,26 +158,33 @@ class RecommenderEngine():
                 start = end
                 df_tmp["predicted_rating"] = ratings
 
-                rating_threshold = rating_threshold if rating_threshold else self.rating_threshold
-                df_tmp = df_tmp[df_tmp["predicted_rating"] >= rating_threshold]
-                df_tmp = df_tmp[df_tmp['genres'].apply(
-                    lambda x: contains_input_genres(x, input_genres))]
-                df_tmp = df_tmp[df_tmp.apply(
-                    lambda x:x['movie_id'] not in x['movie_ids'], axis=1)]
+                if rating_threshold:
+                    df_tmp = df_tmp[df_tmp["predicted_rating"]
+                                    >= rating_threshold]
+
+                if input_genres:
+                    df_tmp = df_tmp[df_tmp['genres'].apply(
+                        lambda x: contains_input_genres(x, input_genres))]
+
+                if not include_input_movies:
+                    df_tmp = df_tmp[df_tmp.apply(
+                        lambda x: x['movie_id'] not in x['movie_ids'], axis=1)]
+
                 df_list.append(df_tmp)
                 curr_count += len(df_tmp)
-                if curr_count >= topk:
-                    # if number of movie with predicted rating >= rating threshold,
-                    # is larger then topk,
-                    # we stop recommending.
-                    break
+                if topk:
+                    if curr_count >= topk:
+                        # if number of movie with predicted rating >= rating threshold,
+                        # is larger then topk,
+                        # we stop recommending.
+                        break
 
         df_inference = pd.concat(df_list, axis=0)
 
         return df_inference
 
     @utils.timer
-    def postprocess(self, df_inference, topk=5):
+    def postprocess(self, df_inference, topk=None):
 
         selected_cols = list(self.movie_info.columns)+['predicted_rating']
         df_inference = df_inference[selected_cols]
@@ -182,24 +192,56 @@ class RecommenderEngine():
         df_inference = df_inference.sort_values(
             by=['predicted_rating'], ascending=False)
 
-        results = df_inference.head(topk).to_dict(orient='records')
+        if topk:
+            df_inference = df_inference.head(topk)
+
+        results = df_inference.to_dict(orient='records')
 
         return results
 
     def recommend(self, movie_ids: List[int], user_age: int, sex: str,
                   rating_threshold: float = 4.8, topk=5) -> List[Dict]:
 
+        rating_threshold = self.rating_threshold if not rating_threshold else rating_threshold
+        df_input = self.preprocess(
+            movie_ids=movie_ids, user_age=user_age, sex=sex, movie_info=self.movie_info)
+
         input_genres = set(self.movie_info[self.movie_info.movie_id.isin(
             movie_ids)]['genres'].explode())
 
-        df_input = self.preprocess(
-            movie_ids=movie_ids, user_age=user_age, sex=sex)
-
         df_inference = self.inference(
-            df_input=df_input, topk=topk,
+            df_input=df_input,
+            topk=topk,
             rating_threshold=rating_threshold,
-            input_genres=input_genres)
+            input_genres=input_genres,
+            include_input_movies=False)
 
         outputs = self.postprocess(df_inference=df_inference, topk=topk)
+
+        return outputs
+
+    def get_scores(self, viewed_movie_ids: List[int],
+                   suggested_movie_ids: List[int],
+                   user_age: int,
+                   sex: str):
+
+        movie_info = self.movie_info[self.movie_info['movie_id'].isin(
+            suggested_movie_ids)
+        ].copy()
+
+        df_input = self.preprocess(
+            movie_ids=viewed_movie_ids,
+            user_age=user_age,
+            sex=sex,
+            movie_info=movie_info)
+
+        df_inference = self.inference(
+            df_input=df_input,
+            topk=None,
+            rating_threshold=None,
+            input_genres=None,
+            include_input_movies=True)
+
+        outputs = self.postprocess(df_inference=df_inference, topk=None)
 
         return outputs

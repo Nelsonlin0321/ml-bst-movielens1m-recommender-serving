@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from src import utils
-from src.payload import PayLoad
+from src.payload import RecommendPayLoad, ScoringPayLoad
 from src.recommender import RecommenderEngine
 
 logger = logging.getLogger()
@@ -31,18 +31,33 @@ else:
     raise ValueError("ARTIFACTS_URL Env is not set!")
 
 recommender_engine = RecommenderEngine(
-    artifact_dir=artifact_dir, batch_size=BATCH_SIZE, rating_threshold=4.5)
+    artifact_dir=artifact_dir, batch_size=BATCH_SIZE, rating_threshold=4)
 
 app = FastAPI()
 
 
 @app.post("/recommend")
-async def recommend(pay_load: PayLoad):
+async def recommend(pay_load: RecommendPayLoad):
     # pylint: disable=unexpected-keyword-arg
     try:
         results = recommender_engine.recommend(
             movie_ids=pay_load.movie_ids, user_age=pay_load.user_age,
             sex=pay_load.sex, topk=pay_load.topk, rating_threshold=pay_load.rating_threshold)
+    # # pylint: disable=broad-exception-caught
+    except Exception as error:
+        logging.error(error)
+        return HTTPException(status_code=500, detail=str(error))
+    return results
+
+
+@app.post("/get_scores")
+async def get_scores(pay_load: ScoringPayLoad):
+    # pylint: disable=unexpected-keyword-arg
+    try:
+        results = recommender_engine.get_scores(
+            viewed_movie_ids=pay_load.viewed_movie_ids,
+            suggested_movie_ids=pay_load.suggested_movie_ids,
+            sex=pay_load.sex, user_age=pay_load.user_age)
     # # pylint: disable=broad-exception-caught
     except Exception as error:
         logging.error(error)
