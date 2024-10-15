@@ -1,6 +1,6 @@
-fastapi==0.105.0
-uvicorn==0.25.0
-boto3==1.34.23
+fastapi
+uvicorn
+boto3
 mangum
 pandas
 pyarrow
@@ -8,5 +8,5 @@ python-dotenv
 scikit-learn
 tqdm
 awscli
-gunicorn==21.2.0
+gunicorn
 pytest
