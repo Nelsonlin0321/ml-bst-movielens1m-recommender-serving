@@ -1,4 +1,4 @@
-typing_extensions==4.7.1
+typing_extensions
 fastapi
 uvicorn
 boto3
