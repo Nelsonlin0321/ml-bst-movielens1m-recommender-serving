@@ -1,4 +1,3 @@
-typing_extensions
 fastapi
 uvicorn
 boto3
@@ -11,3 +10,4 @@ awscli
 gunicorn
 pytest
 mangum
+typing_extensions==4.8.0
