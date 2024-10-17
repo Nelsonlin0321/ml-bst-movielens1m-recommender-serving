@@ -33,7 +33,7 @@ class RecommenderEngine():
         self.sequence_length = self.config_dict['sequence_length']
 
         self.model.load_state_dict(
-            torch.load(f"{artifact_dir}/model/pytorch_model.pt"))
+            torch.load(f"{artifact_dir}/model/pytorch_model.pt", weights_only=True))
 
         self.movie_id_map_dict = utils.open_object(
             f"{artifact_dir}/artifacts/movie_id_map_dict.pkl")

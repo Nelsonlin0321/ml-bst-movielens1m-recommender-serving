@@ -59,7 +59,7 @@ pip3 install -r requirements.txt
 pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 
 source .env
-uvicorn server:app --reload-dir src --host 0.0.0.0 --port 8000
+uvicorn server:app --reload --reload-dir src --host 0.0.0.0 --port 8000
 ```
 
 ### Run Recommender API Using Docker
@@ -69,7 +69,7 @@ uvicorn server:app --reload-dir src --host 0.0.0.0 --port 8000
 docker build -t bst-movielens1m-recommender-serving:latest . --platform linux/arm64/v8
 ```
 
-docker.env
+.env.docker
 ```sh
 AWS_DEFAULT_REGION=ap-southeast-1
 AWS_ACCESS_KEY_ID=
@@ -83,7 +83,7 @@ BATCH_SIZE=256
 
 #### Run Docker Container
 ```sh
-docker run --env-file docker.env -p 5050:5050 -it bst-movielens1m-recommender-serving:latest
+docker run --env-file .env.docker -p 5050:5050 -it bst-movielens1m-recommender-serving:latest
 ```
 or
 ```sh
@@ -123,7 +123,7 @@ docker build -t ${image_name}:latest -f ./Dockerfile.aws.lambda  . --platform li
 ## Test the Lambda
 ```sh
 image_name=movielens1m-recommender-lambda
-docker run --env-file docker.env -p 9000:8080 --name lambda-recommender -it --rm ${image_name}:latest
+docker run --env-file .env.docker -p 9000:8080 --name lambda-recommender -it --rm ${image_name}:latest
 ```
 
 ```sh

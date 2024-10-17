@@ -8,6 +8,6 @@ RUN pip3 install --no-cache-dir torch --index-url https://download.pytorch.org/w
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN pip3 install --no-cache-dir --upgrade typing_extensions==4.7.1
+# RUN pip3 install --no-cache-dir --upgrade typing_extensions==4.7.1
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD [ "server.handler" ]

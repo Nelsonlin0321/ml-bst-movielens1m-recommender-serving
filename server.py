@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from datetime import datetime
 
 import dotenv
@@ -8,7 +9,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
-from src import utils
+# from src import utils
 from src.payload import RecommendPayLoad, ScoringPayLoad
 from src.recommender import RecommenderEngine
 
@@ -18,20 +19,23 @@ logger.setLevel(logging.INFO)
 IS_LOADED = dotenv.load_dotenv(".env")
 if not IS_LOADED:
     logger.info("The env file is not loaded!")
-
-artifact_url = os.getenv("ARTIFACTS_URL")
-BATCH_SIZE = os.getenv("BATCH_SIZE")
-
-if artifact_url is not None:
-    logger.info("ARTIFACTS_URL Env is %s!", artifact_url)
-    artifact_root_dir = utils.download_s3_directory(artifact_url, "/tmp")
-    logger.info("artifact_root_dir is %s!", artifact_root_dir)
-    artifact_dir = os.path.join(artifact_root_dir, 'artifacts')
 else:
-    raise ValueError("ARTIFACTS_URL Env is not set!")
+    logger.info("The env file is loaded!")
+
+# artifact_url = os.getenv(
+#     "ARTIFACTS_URL", "s3://s3-mlflow-artifacts-storage/mlflow/15/7008c7131367497a8dd99e2b2d506f96")
+BATCH_SIZE = int(os.getenv("BATCH_SIZE", "256"))
+
+# if artifact_url is not None:
+#     logger.info("ARTIFACTS_URL Env is %s!", artifact_url)
+#     artifact_root_dir = utils.download_s3_directory(artifact_url, "/tmp")
+#     logger.info("artifact_root_dir is %s!", artifact_root_dir)
+#     artifact_dir = os.path.join(artifact_root_dir, 'artifacts')
+# else:
+#     raise ValueError("ARTIFACTS_URL Env is not set!")
 
 recommender_engine = RecommenderEngine(
-    artifact_dir=artifact_dir, batch_size=BATCH_SIZE, rating_threshold=4)
+    artifact_dir="./artifacts", batch_size=BATCH_SIZE, rating_threshold=4)
 
 app = FastAPI()
 
@@ -43,10 +47,13 @@ async def recommend(pay_load: RecommendPayLoad):
         results = recommender_engine.recommend(
             movie_ids=pay_load.movie_ids, user_age=pay_load.user_age,
             sex=pay_load.sex, topk=pay_load.topk, rating_threshold=pay_load.rating_threshold)
-    # # pylint: disable=broad-exception-caught
-    except Exception as error:
-        logging.error(error)
-        return HTTPException(status_code=500, detail=str(error))
+    # # pylint: disable=broad-exception-caught,unused-variable,
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        line_number = exc_tb.tb_lineno
+        error_message = f"An error occurred on line {line_number}: {str(e)}"
+        logging.error(error_message)
+        return HTTPException(status_code=500, detail=error_message)
     return results
 
 
@@ -58,10 +65,12 @@ async def get_scores(pay_load: ScoringPayLoad):
             viewed_movie_ids=pay_load.viewed_movie_ids,
             suggested_movie_ids=pay_load.suggested_movie_ids,
             sex=pay_load.sex, user_age=pay_load.user_age)
-    # # pylint: disable=broad-exception-caught
-    except Exception as error:
-        logging.error(error)
-        return HTTPException(status_code=500, detail=str(error))
+    # # pylint: disable=broad-exception-caught,unused-variable,
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        line_number = exc_tb.tb_lineno
+        error_message = f"An error occurred on line {line_number}: {str(e)}"
+        return HTTPException(status_code=500, detail=error_message)
     return results
 
 
