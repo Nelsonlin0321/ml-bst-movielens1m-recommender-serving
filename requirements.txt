@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 boto3
-mangum
 pandas
 pyarrow
 python-dotenv
